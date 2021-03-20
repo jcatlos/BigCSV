@@ -16,7 +16,7 @@ std::string getNextWord(std::string& line, std::string::iterator& it){
     return out;
 }
 
-// Recieves the command with the keywords CREATE TABLE
+// CREATE TABLE table_name [SET att=val, … ]
 void parseCreate(std::vector<std::string>& command){
     if(command.size() < 3){
         std::cout<<"Invalid command form";
@@ -29,14 +29,16 @@ void parseCreate(std::vector<std::string>& command){
     if(command[3] == "SET"){
         for(int i=4; i<command.size(); i++){
             // Spracuj dvojicu att=val;
-            std::cout<<"att=val";
+            std::cout<<" att=val";
         }
     }
     else if(command.size() > 3){
         std::cout<<"Error: Malformed CREATE TABLE query" <<std::endl;
         return;
     }
-    
+
+    // Vytvor tabulku
+
     std::cout<<std::endl;
 }
 
@@ -44,7 +46,7 @@ void loadCommand(std::istream& in){
     std::string line;
     std::getline(in, line ,';');
 
-    std::vector<std::string> command = std::vector<std::string>();
+    std::vector<std::string> command;
     std::string word = "";
     auto it = line.begin();
     while(it != line.end()){
