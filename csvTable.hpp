@@ -23,12 +23,12 @@ namespace bigCSV{
         std::vector<csvFile> input_files;
         std::vector<bool> extends_schema;           // extends_schema[i] is true when
 
-        csvTable(char delim, char qchar, char endl) : delimiter(delim), quotechar(qchar), endline(endl), columns(), input_files(){};
-
 
         void addStream(std::string path, char delimiter, char endline, char quotechar, bool extends);
 
 
+    public:
+        csvTable(char delim, char qchar, char endl) : delimiter(delim), quotechar(qchar), endline(endl), columns(), input_files(){}
     };
 }
 
