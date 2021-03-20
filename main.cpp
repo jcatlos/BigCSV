@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "csvFile.hpp"
+#include "csvTable.hpp"
+#include "helper.hpp"
 
 std::string getNextWord(std::string& line, std::string::iterator& it){
     std::string out = "";
@@ -42,7 +44,12 @@ void parseCreate(std::vector<std::string>& command){
     std::cout<<std::endl;
 }
 
-void loadCommand(std::istream& in){
+void run(std::istream& in){
+
+    // Variables for the whole program
+    std::map<std::string, bigCSV::csvTable> tables;
+
+
     std::string line;
     std::getline(in, line ,';');
 
@@ -50,7 +57,6 @@ void loadCommand(std::istream& in){
     std::string word = "";
     auto it = line.begin();
     while(it != line.end()){
-        std::cout<<"here"<<std::endl;
         word = "";
         while(word.size() == 0){
             word = getNextWord(line, it);
@@ -60,8 +66,34 @@ void loadCommand(std::istream& in){
 
     word = command[0];
 
+    // CREATE TABLE
     if(word == "CREATE") {
-        parseCreate(command);
+        if(command.size() < 3) std::cout<<"Invalid command form";
+        std::string table_name = command[2];
+
+        std::map<std::string, std::string> table_attributes;
+        table_attributes["DELIMITER"] = ",";
+        table_attributes["QUOTECHAR"] = "\"";
+        table_attributes["ENDLINE"] = "\n";
+
+        if(command[3] == "SET"){
+            for(int i=4; i<command.size(); i++){
+                if(!bigCSV::setAttribute(command[i], table_attributes)){
+                    std::cout<<"Problem with attribute "<<i<<std::endl;
+                    return;
+                }
+            }
+        }
+        else if(command.size() > 3){
+            std::cout<<"Error: Malformed CREATE TABLE query" <<std::endl;
+            return;
+        }
+
+        tables[table_name] = bigCSV::csvTable(
+                table_attributes["DELIMITER"][0],
+                table_attributes["QUOTECHAR"][0],
+                table_attributes["ENDLINE"][0]
+                );
     }
     else if(word == "ALTER") {
 
@@ -86,7 +118,7 @@ int main() {
     //file.printFile();
     std::cout<<"Im alive"<<std::endl;
 
-    loadCommand(std::cin);
+    run(std::cin);
 
     return 0;
 }
