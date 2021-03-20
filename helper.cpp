@@ -2,6 +2,8 @@
 // Created by jakub on 15. 3. 2021.
 //
 
+#include <sstream>
+
 #include "helper.hpp"
 
 namespace bigCSV{
@@ -55,5 +57,26 @@ namespace bigCSV{
         output += endline;
 
         return output;
+    }
+
+    std::vector<std::string> split(const std::string& in, const char delim){
+        std::vector<std::string> out;
+        std::stringstream stream(in);
+        std::string substr;
+        while(std::getline(stream, substr, delim)){
+            out.push_back(substr);
+        }
+        return out;
+    }
+
+    bool setAttribute(const std::string& pair, std::map<std::string, std::string> attributes){
+        auto result = split(pair, '=');
+        // Invalid form of attribute setting
+        if(result.size() != 2) return false;
+        auto key_it = attributes.find(result[0]);
+        // Invalid attribute name
+        if(key_it == attributes.end()) return false;
+        key_it->second = result[1];
+        return true;
     }
 }

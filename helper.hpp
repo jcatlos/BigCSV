@@ -8,6 +8,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <map>
 
 namespace bigCSV {
     std::string getQuotedString(std::ifstream& input_stream,
@@ -19,6 +20,10 @@ namespace bigCSV {
     std::string trimmedString(const std::string& str);
 
     std::string formatRow(const std::vector<std::string>& cells, char delimiter, char quotechar, char endline);
+
+    std::vector<std::string> split(const std::string& in, const char delim);
+
+    bool setAttribute(const std::string& pair, std::map<std::string, std::string> attributes);
 }
 
 #endif //BIG_CSV_HELPER_HPP
