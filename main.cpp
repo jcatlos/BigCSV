@@ -1,12 +1,9 @@
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <map>
 #include <vector>
 
 #include "csvFile.hpp"
 #include "csvTable.hpp"
-#include "helper.hpp"
 
 
 int main() {
