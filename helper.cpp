@@ -31,7 +31,7 @@ namespace bigCSV{
             if (c == quotechar) {
                 if (++line_it == line.end()) break;         // If the quotechar is at the end of the line, the quoted string ends
                 c = *(line_it);                                   // Now c is the char after the quotechar
-                if (c == quotechar) out += quotechar;     // Else if c is not quotechar (escaping is done by double quotechar), the quoted string ends
+                if (c == quotechar) out += quotechar;       // Else if c is not quotechar (escaping is done by double quotechar), the quoted string ends
                 else break;
             }
             else if (line_it == line.end()) {               // If a endline is encountered while in quoted sequence, the line end is a part of the cell
