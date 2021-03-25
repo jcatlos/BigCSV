@@ -81,4 +81,14 @@ namespace bigCSV{
         key_it->second = result[1];
         return true;
     }
+
+    std::string getNextWord(std::string& line, std::string::iterator& it){
+        std::string out = "";
+        while(it != line.end() && isspace(*it)) it++;        // Take all the whitespace before the next word
+        while(it != line.end() && !isspace(*it)){
+            out += *it;
+            it++;
+        }
+        return out;
+    }
 }
