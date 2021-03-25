@@ -29,6 +29,7 @@ namespace bigCSV{
 
     public:
         csvTable(char delim, char qchar, char endl) : delimiter(delim), quotechar(qchar), endline(endl), columns(), input_files(){}
+        csvTable() : delimiter(','), quotechar('"'), endline('\n'), columns(), input_files(){}
     };
 }
 

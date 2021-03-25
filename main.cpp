@@ -18,32 +18,6 @@ std::string getNextWord(std::string& line, std::string::iterator& it){
     return out;
 }
 
-// CREATE TABLE table_name [SET att=val, … ]
-void parseCreate(std::vector<std::string>& command){
-    if(command.size() < 3){
-        std::cout<<"Invalid command form";
-    }
-
-    std::string table_name = command[2];
-
-    std::cout<<"CREATE TABLE "<<table_name;
-
-    if(command[3] == "SET"){
-        for(int i=4; i<command.size(); i++){
-            // Spracuj dvojicu att=val;
-            std::cout<<" att=val";
-        }
-    }
-    else if(command.size() > 3){
-        std::cout<<"Error: Malformed CREATE TABLE query" <<std::endl;
-        return;
-    }
-
-    // Vytvor tabulku
-
-    std::cout<<std::endl;
-}
-
 void run(std::istream& in){
 
     // Variables for the whole program
@@ -114,11 +88,14 @@ void run(std::istream& in){
 }
 
 int main() {
-    //bigCSV::csvFile file("input.csv", ',', '\n', '"');
-    //file.printFile();
-    std::cout<<"Im alive"<<std::endl;
+    bigCSV::csvFile file("input.csv", ',', '\n', '"');
+    std::vector<std::string> printed_columns;
 
-    run(std::cin);
+    printed_columns.push_back("First name");
+    printed_columns.push_back("SSN");
+    file.printColumns(printed_columns);
+
+    //run(std::cin);
 
     return 0;
 }

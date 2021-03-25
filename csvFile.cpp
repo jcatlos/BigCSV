@@ -12,7 +12,7 @@
 
 namespace bigCSV {
     csvFile::csvFile(const std::string& fn, char delim, char le, char q)
-            : delimiter(delim), endline(le), quotechar(q), columns()
+            : delimiter(delim), endline(le), quotechar(q), columns(), file_name(fn)
         {
             // Find the last dot in the file and take everything before as the name
             for(int dot_i = fn.length()-1; dot_i >= 0; dot_i--){
@@ -20,7 +20,7 @@ namespace bigCSV {
                 // IMPLEMENT
 
             }
-            input_stream.open(fn, std::ifstream::in);
+            input_stream.open(file_name, std::ifstream::in);
             auto col_names = this->getNextLine();
             column_count = col_names.size();
             for(int i = 0; i<col_names.size(); i++){
@@ -41,12 +41,13 @@ namespace bigCSV {
 
             // Parse quoted strings
             if (c == quotechar) {
+                token = "";
                 token += getQuotedString(input_stream, line_it, line, quotechar, endline);
                 c = *line_it;
                 if(line_it == line.end()) break;
             }
 
-            // An end of a token was found - cannot be esle if, because the previous branch may have moved the iterator
+            // An end of a token was found - cannot be else if, because the previous branch may have moved the iterator
             if (c == delimiter) {
                 out.push_back(token);
                 token = "";
@@ -67,14 +68,27 @@ namespace bigCSV {
     void csvFile::printColumns(std::vector<std::string> input_columns) {
         // Printing the first row
         std::vector<std::string> line_tokens;
-        for(auto col_it = columns.begin(); col_it != columns.end(); col_it++){
-            line_tokens.push_back(col_it->first);
+        for(auto col_it = input_columns.begin(); col_it != input_columns.end(); col_it++){
+            line_tokens.push_back(*col_it);
         }
         std::cout<<formatRow(line_tokens, delimiter, quotechar, endline);
 
+        std::vector<int> line_mask;
+        for(auto&& column : input_columns){
+            line_mask.push_back(columns[column]);
+        }
+        for(auto&& index : line_mask){
+            std::cout<<index<<std::endl;
+        }
+
+        std::vector<std::string> out_tokens;
         while(input_stream.good()){
             line_tokens = getNextLine();
-
+            out_tokens.clear();
+            for(auto&& index : line_mask){
+                out_tokens.push_back(line_tokens[index]);
+            }
+            std::cout<<formatRow(out_tokens, delimiter, quotechar, endline);
         }
     }
 
