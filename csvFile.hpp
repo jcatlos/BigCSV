@@ -25,6 +25,7 @@ namespace bigCSV {
         csvFile(const std::string& fn, char delim, char le, char q);
         std::vector<std::string> getNextLine();
         void printColumns(std::vector<std::string> input_columns);
+        void trivialSort(std::vector<std::string> sortColumns);
     };
 }
 

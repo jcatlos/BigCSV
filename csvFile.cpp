@@ -9,17 +9,12 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 namespace bigCSV {
     csvFile::csvFile(const std::string& fn, char delim, char le, char q)
             : delimiter(delim), endline(le), quotechar(q), columns(), file_name(fn)
         {
-            // Find the last dot in the file and take everything before as the name
-            for(int dot_i = fn.length()-1; dot_i >= 0; dot_i--){
-
-                // IMPLEMENT
-
-            }
             input_stream.open(file_name, std::ifstream::in);
             auto col_names = this->getNextLine();
             column_count = col_names.size();
@@ -89,6 +84,38 @@ namespace bigCSV {
                 out_tokens.push_back(line_tokens[index]);
             }
             std::cout<<formatRow(out_tokens, delimiter, quotechar, endline);
+        }
+    }
+
+    // Sort used on a file small enough to be sorted in memory
+    void csvFile::trivialSort(std::vector<std::string> sortColumns){
+        // Add all lines of a file in a vector
+        std::vector<std::vector<std::string>> lines;
+        while(input_stream.good()){
+            lines.push_back(getNextLine());
+        }
+        // Get indexes of the columns we sort by (in order of sorting)
+        std::vector<int> mask;
+        for(auto&& col : sortColumns){
+            mask.push_back(columns[col]);
+        }
+        // Call the sort function using a custom lambda based on the sorted columns
+        std::sort(
+                lines.begin(),
+                lines.end(),
+                [&mask](const std::vector<std::string>& a, const std::vector<std::string>& b)
+                    {
+                        for(const auto& m : mask){
+                            if(a[m].compare(b[m]) < 0) return true;
+                            if(a[m].compare(b[m]) > 0) return false;
+                        }
+                        return true;
+                    }
+        );
+        // Now export the lines into a new file
+            // for now print it
+        for(auto&& line : lines){
+            std::cout<<formatRow(line, delimiter, quotechar, endline);
         }
     }
 
