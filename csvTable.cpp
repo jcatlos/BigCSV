@@ -13,4 +13,9 @@ namespace bigCSV{
         input_files.emplace_back(path, delimiter, endline, quotechar);
         extends_schema.push_back(extends);
     }
+
+    std::filesystem::path csvTable::newTmpFilePath() {
+        return _tmp_dir.append(std::to_string(_tmp_file_count++));
+    }
+
 }
