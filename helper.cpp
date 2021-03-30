@@ -5,6 +5,10 @@
 #include <sstream>
 
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <random>
+#include <cstdio>
 
 #include "helper.hpp"
 
@@ -90,5 +94,12 @@ namespace bigCSV{
             it++;
         }
         return out;
+    }
+
+    tmpFile getTmpFile(){
+        std::filesystem::path tmp_path = std::filesystem::temp_directory_path(); // MAY GENERATE DUPLICIT FILES
+        std::string name = std::tmpnam(nullptr);
+        tmp_path.concat(name);
+        return tmpFile(tmp_path);
     }
 }

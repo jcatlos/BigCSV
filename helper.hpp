@@ -9,6 +9,9 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <filesystem>
+
+#include "tmpFile.hpp"
 
 namespace bigCSV {
     std::string getQuotedString(std::ifstream& input_stream,
@@ -26,6 +29,8 @@ namespace bigCSV {
     bool setAttribute(const std::string& pair, std::map<std::string, std::string> attributes);
 
     std::string getNextWord(std::string& line, std::string::iterator& it);
+
+    tmpFile getTmpFile();
 }
 
 #endif //BIG_CSV_HELPER_HPP

@@ -4,6 +4,7 @@
 
 #include "csvFile.hpp"
 #include "helper.hpp"
+#include "tmpFileFactory.hpp"
 
 #include <fstream>
 #include <string>
@@ -12,16 +13,32 @@
 #include <algorithm>
 
 namespace bigCSV {
-    csvFile::csvFile(const std::string& fn, char delim, char le, char q)
-            : delimiter(delim), endline(le), quotechar(q), columns(), file_name(fn)
-        {
-            input_stream.open(file_name, std::ifstream::in);
-            auto col_names = this->getNextLine();
-            column_count = col_names.size();
-            for(int i = 0; i<col_names.size(); i++){
-                columns[trimmedString(col_names[i])] = i;
-            }
+    csvFile::csvFile(const std::filesystem::path& fn, char delim, char le, char q)
+            : delimiter(delim), endline(le), quotechar(q), columns(), file(fn), input_stream(fn, std::ifstream::in)
+    {
+        initialize();
+    }
+
+    csvFile::csvFile(File&& fn, char delim, char le, char q)
+            : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream(fn.get_path(), std::ifstream::in)
+    {
+        initialize();
+    }
+
+    void csvFile::initialize() {
+        col_names = this->getNextLine();
+        column_count = col_names.size();
+        for(int i = 0; i<col_names.size(); i++){
+            columns[trimmedString(col_names[i])] = i;
         }
+    }
+
+    void csvFile::resetFile(){
+        input_stream.close();
+        input_stream.open(file->get_path(), std::ifstream::in);
+    }
+
+
 
     std::vector<std::string> csvFile::getNextLine() {
         std::vector<std::string> out = std::vector<std::string>();
@@ -76,6 +93,7 @@ namespace bigCSV {
             std::cout<<index<<std::endl;
         }
 
+        resetFile();
         std::vector<std::string> out_tokens;
         while(input_stream.good()){
             line_tokens = getNextLine();
@@ -91,6 +109,7 @@ namespace bigCSV {
     void csvFile::trivialSort(std::vector<std::string> sortColumns){
         // Add all lines of a file in a vector
         std::vector<std::vector<std::string>> lines;
+        resetFile();
         while(input_stream.good()){
             lines.push_back(getNextLine());
         }
@@ -119,4 +138,25 @@ namespace bigCSV {
         }
     }
 
+    std::vector<csvFile> csvFile::distribute() {
+        std::vector<csvFile> out;
+        std::string header = formatRow(col_names, delimiter, quotechar, endline);
+        resetFile();
+        while(input_stream.good()){
+            // Create next output file
+            auto tmp_file = tmpFileFactory::get_tmpFile();
+            //std::cout<<"file "<<out_path.filename()<<" opened"<<std::endl;
+            std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
+            //Add the header row to each file
+            out_file<<header;
+            // Fill it while the main file is not empty or the output file is not full
+            while(input_stream.good() && std::filesystem::file_size(tmp_file.get_path()) < 1000){      // CHANGE MAX FILE SIZE (for in-memory sort)
+                out_file<<formatRow(getNextLine(), delimiter, quotechar, endline);
+            }
+            // Close the file and add it to the output
+            out.emplace_back(std::move(tmp_file), delimiter, endline, quotechar);
+            std::cout<<"emplaced"<<std::endl;
+        }
+        return out;
+    }
 }
