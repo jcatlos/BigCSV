@@ -98,7 +98,7 @@ namespace bigCSV{
         return out;
     }
 
-    bigCSV::csvFile merge2(bigCSV::csvFile& first, bigCSV::csvFile& second, char delimiter, char quotechar, char endline){
+    /*bigCSV::csvFile merge2(bigCSV::csvFile& first, bigCSV::csvFile& second, char delimiter, char quotechar, char endline){
         // Open input files
         first.open_input_stream(false);
         second.open_input_stream(true);
@@ -117,7 +117,7 @@ namespace bigCSV{
             // FINISH
             // PASS COMPARATOR
         }
-    }
+    }*/
 
     /*bigCSV::csvFile merge(std::vector<bigCSV::csvFile>& input_files){
 
