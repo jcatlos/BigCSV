@@ -36,13 +36,15 @@ namespace bigCSV {
         csvFile(File&& fn, char delim, char le, char q);
 
         std::vector<std::string> getNextLine();
+        std::map<std::string, std::string> getNextLineAsMap();
+
         void printColumns(std::vector<std::string> input_columns);
         void trivialSort(std::vector<std::string> sortColumns);
         std::vector<csvFile> distribute();
 
         std::ifstream& get_ifstream();
-
         void open_input_stream(bool skip_header);
+
         void close_input_stream();
     };
 }

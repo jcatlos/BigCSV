@@ -91,6 +91,15 @@ namespace bigCSV {
         return out;
     }
 
+    std::map<std::string, std::string> csvFile::getNextLineAsMap(){
+        auto line = getNextLine();
+        std::map<std::string, std::string> out;
+        for(auto&& col: columns){
+            out[col.first] = line[col.second];
+        }
+        return out;
+    }
+
     void csvFile::printColumns(std::vector<std::string> input_columns) {
         open_input_stream(true);
         // Printing the first row
