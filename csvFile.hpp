@@ -15,7 +15,6 @@
 
 namespace bigCSV {
     class csvFile {
-        std::ifstream input_stream;
         // As these 3 are defined at the file-level, they have to be stored at each instance of file
         char delimiter;
         char endline;
@@ -23,14 +22,15 @@ namespace bigCSV {
         int column_count;
         std::vector<std::string> col_names;
 
-        File file;
-
-
         void initialize();
-        void resetFile();
 
     public:
+        File file;                      // Move to private when debugged
+        std::ifstream input_stream;     // Same
+
         std::map<std::string, int> columns;
+
+        bool open;
 
         csvFile(const std::filesystem::path& fn, char delim, char le, char q);
         csvFile(File&& fn, char delim, char le, char q);
@@ -39,6 +39,11 @@ namespace bigCSV {
         void printColumns(std::vector<std::string> input_columns);
         void trivialSort(std::vector<std::string> sortColumns);
         std::vector<csvFile> distribute();
+
+        std::ifstream& get_ifstream();
+
+        void open_input_stream(bool skip_header);
+        void close_input_stream();
     };
 }
 

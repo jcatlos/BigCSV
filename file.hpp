@@ -14,7 +14,7 @@ namespace bigCSV{
         bool temporary;
     public:
         File() = delete;
-        explicit File(std::filesystem::path p, bool temp);
+        File(std::filesystem::path p, bool temp);
         explicit File(std::filesystem::path p) :path(p), temporary(false) {}
         File(const File& file) = delete;
         File(File&& file) noexcept;

@@ -11,8 +11,6 @@
 #include <map>
 #include <filesystem>
 
-#include "tmpFile.hpp"
-
 namespace bigCSV {
     std::string getQuotedString(std::ifstream& input_stream,
                                 std::string::const_iterator &line_it,
@@ -30,7 +28,6 @@ namespace bigCSV {
 
     std::string getNextWord(std::string& line, std::string::iterator& it);
 
-    tmpFile getTmpFile();
 }
 
 #endif //BIG_CSV_HELPER_HPP

@@ -6,7 +6,7 @@
 
 #define CATLOS_TMPFILEFACTORY_HPP
 #include <filesystem>
-#include "tmpFile.hpp"
+#include "file.hpp"
 
 namespace bigCSV{
     class tmpFileFactory {

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <filesystem>
+#include <map>
 
 #include "csvFile.hpp"
 
@@ -20,19 +21,19 @@ namespace bigCSV{
         char quotechar;
         char endline;
 
-        std::vector<std::string> columns;
-        std::vector<csvFile> input_files;
-        std::vector<bool> extends_schema;           // extends_schema[i] is true when
-
-        std::filesystem::path _tmp_dir;
+        std::map<std::filesystem::path, csvFile> input_files;
+        //std::map<std::string, int> columns;
 
     public:
 
 
         csvTable(char delim, char qchar, char endl)
-            : delimiter(delim), quotechar(qchar), endline(endl), _tmp_dir(std::filesystem::temp_directory_path()){}
+            : delimiter(delim), quotechar(qchar), endline(endl){}
         csvTable()
-            : delimiter(','), quotechar('"'), endline('\n'), _tmp_dir(std::filesystem::temp_directory_path()){}
+            : delimiter(','), quotechar('"'), endline('\n'){}
+
+        void printColumns(const std::vector<std::string>& input_columns);// IMPLEMENT
+
         void sort(std::ofstream out, std::vector<std::string> sortColumns); // IMPLEMENT
 
         void addStream(std::filesystem::path path, char delimiter, char endline, char quotechar, bool extends);

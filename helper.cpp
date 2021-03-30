@@ -11,6 +11,8 @@
 #include <cstdio>
 
 #include "helper.hpp"
+#include "csvFile.hpp"
+#include "tmpFileFactory.hpp"
 
 namespace bigCSV{
     std::string trimmedString(const std::string& str){
@@ -24,10 +26,10 @@ namespace bigCSV{
     }
 
     std::string getQuotedString(std::ifstream& input_stream,
-                                        std::string::const_iterator &line_it,
-                                        std::string& line,
-                                        char quotechar,
-                                        char endline)
+                                std::string::const_iterator &line_it,
+                                std::string& line,
+                                char quotechar,
+                                char endline)
     {
         std::string out;
         char c = *(++line_it);
@@ -96,10 +98,28 @@ namespace bigCSV{
         return out;
     }
 
-    tmpFile getTmpFile(){
-        std::filesystem::path tmp_path = std::filesystem::temp_directory_path(); // MAY GENERATE DUPLICIT FILES
-        std::string name = std::tmpnam(nullptr);
-        tmp_path.concat(name);
-        return tmpFile(tmp_path);
+    bigCSV::csvFile merge2(bigCSV::csvFile& first, bigCSV::csvFile& second, char delimiter, char quotechar, char endline){
+        // Open input files
+        first.open_input_stream(false);
+        second.open_input_stream(true);
+
+        // Open output file
+        bigCSV::File out_file = tmpFileFactory::get_tmpFile();
+        std::ofstream out_stream(out_file.get_path(), std::ofstream::trunc);
+        out_stream<<formatRow(first.getNextLine(), delimiter, quotechar, endline);
+
+        // Initialize rows
+        std::vector<std::string> first_columns = first.getNextLine();
+        std::vector<std::string> second_columns = second.getNextLine();
+
+        // Merge
+        while(first.open && second.open){
+            // FINISH
+            // PASS COMPARATOR
+        }
     }
+
+    /*bigCSV::csvFile merge(std::vector<bigCSV::csvFile>& input_files){
+
+    }*/
 }
