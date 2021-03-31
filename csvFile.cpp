@@ -56,7 +56,13 @@ namespace bigCSV {
 
         std::string line;
         std::getline(input_stream, line, endline);
-        if (line.length() == 0) return out;
+
+        // Check if something can be read from the file
+        if(input_stream.peek() == EOF){
+            open = false;
+            return out;
+        }
+        //if (line.length() == 0) return out;
 
         std::string token = "";
         for (std::string::const_iterator line_it = line.begin(); line_it != line.end(); line_it++) {
@@ -82,8 +88,8 @@ namespace bigCSV {
             }
         }
 
-        // If !input_stream.good() set the open bit to false
-        open = input_stream.good();
+        // If at the end of file set the open bit to false
+        open = input_stream.peek() != EOF;
 
         // The line must not end with a delimiter, so the last token must be added into the output
         out.push_back(token);
@@ -128,7 +134,7 @@ namespace bigCSV {
 
 
         std::vector<std::string> out_tokens;
-        while(input_stream.good()){
+        while(open){
             //out<<"i live"<<std::endl;
             line_tokens = getNextLine();
             out_tokens.clear();
@@ -147,7 +153,7 @@ namespace bigCSV {
         // Add all lines of a file in a vector
         std::vector<TableRow> lines;
         open_input_stream(true);
-        while(input_stream.good()){
+        while(open){
             lines.push_back(getNextTableRow());
         }
         close_input_stream();
@@ -169,7 +175,7 @@ namespace bigCSV {
         open_input_stream(true);
         std::vector<csvFile> out;
         std::string header = formatRow(col_names, delimiter, quotechar, endline);
-        while(input_stream.good()){
+        while(open){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
             std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
