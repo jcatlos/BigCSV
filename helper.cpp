@@ -13,6 +13,7 @@
 #include "helper.hpp"
 #include "csvFile.hpp"
 #include "tmpFileFactory.hpp"
+#include "RowComparator.hpp"
 
 namespace bigCSV{
     std::string trimmedString(const std::string& str){
@@ -98,26 +99,24 @@ namespace bigCSV{
         return out;
     }
 
-    /*bigCSV::csvFile merge2(bigCSV::csvFile& first, bigCSV::csvFile& second, char delimiter, char quotechar, char endline){
-        // Open input files
-        first.open_input_stream(false);
-        second.open_input_stream(true);
+    std::vector<std::string> createJoinedSchema (const bigCSV::TableRow& first,
+                                                 const bigCSV::TableRow& second){
+        std::vector<std::string> out;
 
-        // Open output file
-        bigCSV::File out_file = tmpFileFactory::get_tmpFile();
-        std::ofstream out_stream(out_file.get_path(), std::ofstream::trunc);
-        out_stream<<formatRow(first.getNextLine(), delimiter, quotechar, endline);
-
-        // Initialize rows
-        std::vector<std::string> first_columns = first.getNextLine();
-        std::vector<std::string> second_columns = second.getNextLine();
-
-        // Merge
-        while(first.open && second.open){
-            // FINISH
-            // PASS COMPARATOR
+        // Insert all of the columns of the first schema
+        for(auto&& col : first.schema){
+            out.push_back(col);
         }
-    }*/
+
+        // Insert all columns from the second schema that were no already inserted
+        for(auto&& col : second.schema){
+            if(first.map.find(col) == first.map.end()){
+                out.push_back(col);
+            }
+        }
+
+        return out;
+    }
 
     /*bigCSV::csvFile merge(std::vector<bigCSV::csvFile>& input_files){
 

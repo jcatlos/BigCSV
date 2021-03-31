@@ -91,77 +91,77 @@ namespace bigCSV {
         return out;
     }
 
-    std::map<std::string, std::string> csvFile::getNextLineAsMap(){
+    TableRow csvFile::getNextTableRow() {
         auto line = getNextLine();
-        std::map<std::string, std::string> out;
-        for(auto&& col: columns){
-            out[col.first] = line[col.second];
+        TableRow out;
+        for(int i=0; i<line.size(); i++){
+            out.map[col_names[i]] = line[i];
+            out.schema.push_back(col_names[i]);
+            out.values.push_back(line[i]);
+
         }
+
         return out;
     }
 
-    void csvFile::printColumns(std::vector<std::string> input_columns) {
+    void csvFile::printColumns(std::ostream& out) {
+        printColumns(out, col_names);
+    }
+
+    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns) {
         open_input_stream(true);
         // Printing the first row
         std::vector<std::string> line_tokens;
-        /* WTF IS THIS??
-         * for(auto col_it = input_columns.begin(); col_it != input_columns.end(); col_it++){
-            line_tokens.push_back(*col_it);
-        }*/
 
         // Not needed, pinted in table
         //std::cout<<formatRow(input_columns, delimiter, quotechar, endline);
 
         std::vector<int> line_mask;
-        for(auto&& column : input_columns){
+        for(const auto& column : input_columns){
+            std::cout<<"working with column "<<column<<std::endl;
             if(columns.find(column) == columns.end()) line_mask.push_back(INT32_MAX);
             else line_mask.push_back(columns[column]);
         }
 
+        for(auto&& m : line_mask) out<<m<<std::endl;
+        std::cout<<"Mask finished"<<std::endl;
+
+
         std::vector<std::string> out_tokens;
         while(input_stream.good()){
+            //out<<"i live"<<std::endl;
             line_tokens = getNextLine();
             out_tokens.clear();
             for(auto&& index : line_mask){
                 if(line_tokens.size() <= index) out_tokens.push_back("");
                 else out_tokens.push_back(line_tokens[index]);
             }
-            std::cout<<formatRow(out_tokens, delimiter, quotechar, endline);
+            out<<formatRow(out_tokens, delimiter, quotechar, endline);
         }
+        std::cout<<"printed"<<std::endl;
         close_input_stream();
     }
 
     // Sort used on a file small enough to be sorted in memory
-    void csvFile::trivialSort(std::vector<std::string> sortColumns){
+    void csvFile::trivialSort(std::ostream& out, const RowComparator& comp){
         // Add all lines of a file in a vector
-        std::vector<std::vector<std::string>> lines;
+        std::vector<TableRow> lines;
         open_input_stream(true);
         while(input_stream.good()){
-            lines.push_back(getNextLine());
+            lines.push_back(getNextTableRow());
         }
         close_input_stream();
         // Get indexes of the columns we sort by (in order of sorting)
-        std::vector<int> mask;
-        for(auto&& col : sortColumns){
-            mask.push_back(columns[col]);
-        }
         // Call the sort function using a custom lambda based on the sorted columns
         std::sort(
                 lines.begin(),
                 lines.end(),
-                [&mask](const std::vector<std::string>& a, const std::vector<std::string>& b)
-                    {
-                        for(const auto& m : mask){
-                            if(a[m].compare(b[m]) < 0) return true;
-                            if(a[m].compare(b[m]) > 0) return false;
-                        }
-                        return true;
-                    }
+                comp
         );
         // Now export the lines into a new file
             // for now print it
         for(auto&& line : lines){
-            std::cout<<formatRow(line, delimiter, quotechar, endline);
+            out<<formatRow(line.toLine(col_names), delimiter, quotechar, endline);
         }
     }
 
@@ -172,16 +172,18 @@ namespace bigCSV {
         while(input_stream.good()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
-            //std::cout<<"file "<<out_path.filename()<<" opened"<<std::endl;
+            std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
+            std::cout<<header;
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
             while(input_stream.good() && file_size < 1000000){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto row = formatRow(getNextLine(), delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
+                std::cout<<row;
             }
             // Close the file and add it to the output
             out_file.close();

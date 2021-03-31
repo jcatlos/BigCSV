@@ -6,12 +6,11 @@
 
 namespace bigCSV{
 
-    bool RowComparator::compare(const std::map<std::string, std::string> &first_row,
-                                const std::map<std::string, std::string> &second_row) {
+    bool RowComparator::operator()(const TableRow &first_row, const TableRow &second_row) const{
         for(auto&& value: order){
-            if(first_row.find(value) == first_row.end()) return false;
-            if(second_row.find(value) == second_row.end()) return true;
-            int result = first_row.at(value).compare(second_row.at(value));
+            if(first_row.map.find(value) == first_row.map.end()) return false;
+            if(second_row.map.find(value) == second_row.map.end()) return true;
+            int result = first_row.map.at(value).compare(second_row.map.at(value));
             if(result < 0) return true;
             if(result > 0) return false;
         }

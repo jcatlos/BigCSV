@@ -14,10 +14,15 @@ int main() {
 
     //std::cout<<std::filesystem::temp_directory_path()<<std::endl;
     bigCSV::csvTable table;
-    bigCSV::csvFile file("input2.csv", ',', '\n', '"');
+    table.addStream("input.csv", ',', '\n', '"');
+
     std::vector<std::string> printed_columns;
-    printed_columns.push_back("NazevZarizeni");
-    printed_columns.push_back("Obec");
+    /*printed_columns.push_back("NazevZarizeni");
+    printed_columns.push_back("Obec");*/
+    printed_columns.push_back("First name");
+
+    table.sort(std::cout, printed_columns);
+    /*bigCSV::csvFile file("input2.csv", ',', '\n', '"');
     std::cout<<"PRINTING COLUMNS"<<std::endl;
     //file.printColumns(printed_columns);
     //file.trivialSort(printed_columns);
@@ -25,11 +30,11 @@ int main() {
 
     auto files = file.distribute();
     //std::cout<<" size: "<<files.size()<<std::endl;
-    files[2].printColumns(printed_columns);
+    files[2].printColumns(std::cout, printed_columns);
 
 
 
-
+*/
     //auto file = bigCSV::tmpFileFactory::get_tmpFile();
 
 

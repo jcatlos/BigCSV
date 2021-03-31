@@ -9,6 +9,8 @@
 #include <filesystem>
 
 #include "file.hpp"
+#include "TableRow.hpp"
+#include "RowComparator.hpp"
 
 #ifndef BIG_CSV_CSVFILE_HPP
 #define BIG_CSV_CSVFILE_HPP
@@ -36,10 +38,11 @@ namespace bigCSV {
         csvFile(File&& fn, char delim, char le, char q);
 
         std::vector<std::string> getNextLine();
-        std::map<std::string, std::string> getNextLineAsMap();
+        TableRow getNextTableRow();
 
-        void printColumns(std::vector<std::string> input_columns);
-        void trivialSort(std::vector<std::string> sortColumns);
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);
+        void printColumns(std::ostream& out);
+        void trivialSort(std::ostream& out, const RowComparator& comp);
         std::vector<csvFile> distribute();
 
         std::ifstream& get_ifstream();

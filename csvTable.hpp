@@ -9,6 +9,7 @@
 #include <map>
 
 #include "csvFile.hpp"
+#include "RowComparator.hpp"
 
 #ifndef BIG_CSV_CSVTABLE_HPP
 
@@ -32,11 +33,13 @@ namespace bigCSV{
         csvTable()
             : delimiter(','), quotechar('"'), endline('\n'){}
 
-        void printColumns(const std::vector<std::string>& input_columns);// IMPLEMENT
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);// IMPLEMENT
 
-        void sort(std::ofstream out, std::vector<std::string> sortColumns); // IMPLEMENT
+        void sort(std::ostream& out, const RowComparator& comp); // IMPLEMENT
 
-        void addStream(std::filesystem::path path, char delimiter, char endline, char quotechar, bool extends);
+        void addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
+
+        csvFile merge2(csvFile &first, csvFile &second, const RowComparator &comp) const;
     };
 }
 

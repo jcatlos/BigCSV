@@ -11,6 +11,8 @@
 #include <map>
 #include <filesystem>
 
+#include "TableRow.hpp"
+
 namespace bigCSV {
     std::string getQuotedString(std::ifstream& input_stream,
                                 std::string::const_iterator &line_it,
@@ -27,6 +29,8 @@ namespace bigCSV {
     bool setAttribute(const std::string& pair, std::map<std::string, std::string> attributes);
 
     std::string getNextWord(std::string& line, std::string::iterator& it);
+
+    std::vector<std::string> createJoinedSchema (const bigCSV::TableRow& first,const bigCSV::TableRow& second);
 
 }
 

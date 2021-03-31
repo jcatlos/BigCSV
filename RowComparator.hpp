@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "TableRow.hpp"
 
 namespace bigCSV{
     class RowComparator {
@@ -15,8 +16,7 @@ namespace bigCSV{
         std::vector<std::string> order;
     public:
         RowComparator(std::vector<std::string> o) : order(std::move(o)) {}
-        bool compare(const std::map<std::string, std::string>& first_row,
-                     const std::map<std::string, std::string>& second_row);
+        bool operator()(const TableRow& first_row, const TableRow& second_row) const;
     };
 }
 
