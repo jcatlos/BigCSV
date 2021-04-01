@@ -179,7 +179,7 @@ namespace bigCSV {
             //std::cout<<header;
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
-            while(not_eof() && file_size < 10000){      // CHANGE MAX FILE SIZE (for in-memory sort)
+            while(not_eof() && file_size < 13500){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto row = formatRow(getNextLine(), delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
