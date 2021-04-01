@@ -21,7 +21,7 @@ namespace bigCSV{
 
     // FOR NOW ONLY WORKS ON CONSOLE OUTPUT
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns){
-        std::cout<<formatRow(input_columns, delimiter, quotechar, endline);
+        out<<formatRow(input_columns, delimiter, quotechar, endline);
         for(auto&& file: input_files){
             file.second.printColumns(out, input_columns);
         }
