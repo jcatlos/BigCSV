@@ -12,9 +12,10 @@
 #include <filesystem>
 
 #include "TableRow.hpp"
+#include "csvFile.hpp"
 
 namespace bigCSV {
-    std::string getQuotedString(std::ifstream& input_stream,
+    std::string getQuotedString(bigCSV::csvFile& File,
                                 std::string::const_iterator &line_it,
                                 std::string& line,
                                 char quotechar,

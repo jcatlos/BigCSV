@@ -32,7 +32,9 @@ namespace bigCSV {
 
         std::map<std::string, int> columns;
 
-        bool open;
+        inline bool not_eof(){
+            return input_stream.good() && input_stream.peek() != EOF;
+        }
 
         csvFile(const std::filesystem::path& fn, char delim, char le, char q);
         csvFile(File&& fn, char delim, char le, char q);

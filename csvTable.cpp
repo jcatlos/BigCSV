@@ -46,7 +46,7 @@ namespace bigCSV{
 
 
         // Merge
-        while(first.open && second.open){
+        while(first.not_eof() && second.not_eof()){
             if(comp(first_columns, second_columns)){
                 out_stream<<formatRow(first_columns.toLine(schema), delimiter, quotechar, endline);
                 first_columns = first.getNextTableRow();
@@ -56,11 +56,11 @@ namespace bigCSV{
                 second_columns = second.getNextTableRow();
             }
         }
-        while(first.open){
+        while(first.not_eof()){
             out_stream<<formatRow(first_columns.toLine(schema), delimiter, quotechar, endline);
             first_columns = first.getNextTableRow();
         }
-        while(second.open){
+        while(second.not_eof()){
             out_stream<<formatRow(second_columns.toLine(schema), delimiter, quotechar, endline);
             second_columns = second.getNextTableRow();
         }

@@ -26,7 +26,7 @@ namespace bigCSV{
         return std::string(it, rit.base());
     }
 
-    std::string getQuotedString(std::ifstream& input_stream,
+    std::string getQuotedString(bigCSV::csvFile& file,
                                 std::string::const_iterator &line_it,
                                 std::string& line,
                                 char quotechar,
@@ -34,7 +34,9 @@ namespace bigCSV{
     {
         std::string out;
         char c = *(++line_it);
-        while (!input_stream.eof()) {
+        //std::cout<<"\t entered getQuotedString"<<std::endl;
+        while(true) {
+            //std::cout<<"\t qc = "<<c<<std::endl;
             if (c == quotechar) {
                 if (++line_it == line.end()) break;         // If the quotechar is at the end of the line, the quoted string ends
                 c = *(line_it);                                   // Now c is the char after the quotechar
@@ -43,7 +45,8 @@ namespace bigCSV{
             }
             else if (line_it == line.end()) {               // If a endline is encountered while in quoted sequence, the line end is a part of the cell
                 out += endline;                             // So a new line is read and used as the current line
-                std::getline(input_stream, line, endline);
+                if(!file.not_eof()) break;
+                std::getline(file.input_stream, line, endline);
                 line_it = line.begin();
             }
             else {
@@ -51,6 +54,7 @@ namespace bigCSV{
             }
             c = *(++line_it);                               // Read the next character
         }
+        //std::cout<<"\t returning "<<out<<std::endl;
         return out;
     }
 

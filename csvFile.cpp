@@ -14,13 +14,13 @@
 
 namespace bigCSV {
     csvFile::csvFile(const std::filesystem::path& fn, char delim, char le, char q)
-            : delimiter(delim), endline(le), quotechar(q), columns(), file(fn), input_stream(), open(false)
+            : delimiter(delim), endline(le), quotechar(q), columns(), file(fn), input_stream()
     {
         initialize();
     }
 
     csvFile::csvFile(File&& fn, char delim, char le, char q)
-            : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream(), open(false)
+            : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream()
     {
         initialize();
     }
@@ -38,7 +38,6 @@ namespace bigCSV {
     void csvFile::open_input_stream(bool skip_header) {
         input_stream.close();                                           // Close the file if it is opened
         input_stream.open(file.get_path(), std::ifstream::in);
-        open = true;
         if(skip_header){                                                // Removing the heading line
             std::string s;
             std::getline(input_stream, s, endline);
@@ -47,7 +46,6 @@ namespace bigCSV {
 
     void csvFile::close_input_stream() {
         input_stream.close();
-        open = false;
     }
 
 
@@ -57,21 +55,23 @@ namespace bigCSV {
         std::string line;
         std::getline(input_stream, line, endline);
 
+        /*
         // Check if something can be read from the file
+            // Maybe do it before the getline?
         if(input_stream.peek() == EOF){
             open = false;
             return out;
         }
+         */
         //if (line.length() == 0) return out;
 
         std::string token = "";
         for (std::string::const_iterator line_it = line.begin(); line_it != line.end(); line_it++) {
             char c = *line_it;
-
             // Parse quoted strings
             if (c == quotechar) {
                 token = "";
-                token += getQuotedString(input_stream, line_it, line, quotechar, endline);
+                token += getQuotedString(*this, line_it, line, quotechar, endline);
                 c = *line_it;
                 if(line_it == line.end()) break;
             }
@@ -88,12 +88,9 @@ namespace bigCSV {
             }
         }
 
-        // If at the end of file set the open bit to false
-        open = input_stream.peek() != EOF;
-
         // The line must not end with a delimiter, so the last token must be added into the output
         out.push_back(token);
-
+        
         return out;
     }
 
@@ -134,7 +131,7 @@ namespace bigCSV {
 
 
         std::vector<std::string> out_tokens;
-        while(open){
+        while(not_eof()){
             //out<<"i live"<<std::endl;
             line_tokens = getNextLine();
             out_tokens.clear();
@@ -153,7 +150,7 @@ namespace bigCSV {
         // Add all lines of a file in a vector
         std::vector<TableRow> lines;
         open_input_stream(true);
-        while(open){
+        while(not_eof()){
             lines.push_back(getNextTableRow());
         }
         close_input_stream();
@@ -175,7 +172,7 @@ namespace bigCSV {
         open_input_stream(true);
         std::vector<csvFile> out;
         std::string header = formatRow(col_names, delimiter, quotechar, endline);
-        while(open){
+        while(not_eof()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
             std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
