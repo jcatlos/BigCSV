@@ -28,16 +28,30 @@ namespace bigCSV{
     }
 
     bigCSV::csvFile csvTable::merge2(csvFile& first, csvFile& second, const RowComparator& comp) const{
+
+        //std::cout<<"Merge started"<<std::endl;
+
+        //std::cout<<"First file:"<<std::endl;
+        //first.printColumns(std::cout);
+        //std::cout<<"Second file:"<<std::endl;
+        //second.printColumns(std::cout);
+
         // Open input files
         first.open_input_stream(true);
         second.open_input_stream(true);
+
+        //std::cout<<"Files opened"<<std::endl;
 
         // Initialize rows
         auto first_columns = first.getNextTableRow();
         auto second_columns = second.getNextTableRow();
 
+        //std::cout<<"Rows initialized"<<std::endl;
+
         // Create the table schema
+        //std::cout<<"Creating schema"<<std::endl;
         std::vector<std::string> schema = createJoinedSchema(first_columns, second_columns);
+        //std::cout<<"Joined schema = "<<formatRow(schema, delimiter, quotechar, endline)<<std::endl;
 
         // Open output file
         bigCSV::File out_file = tmpFileFactory::get_tmpFile();
@@ -46,7 +60,7 @@ namespace bigCSV{
 
 
         // Merge
-        while(first.not_eof() && second.not_eof()){
+        while(!first_columns.empty && !second_columns.empty){
             if(comp(first_columns, second_columns)){
                 out_stream<<formatRow(first_columns.toLine(schema), delimiter, quotechar, endline);
                 first_columns = first.getNextTableRow();
@@ -56,16 +70,16 @@ namespace bigCSV{
                 second_columns = second.getNextTableRow();
             }
         }
-        while(first.not_eof()){
+        while(!first_columns.empty){
             out_stream<<formatRow(first_columns.toLine(schema), delimiter, quotechar, endline);
             first_columns = first.getNextTableRow();
         }
-        while(second.not_eof()){
+        while(!second_columns.empty){
             out_stream<<formatRow(second_columns.toLine(schema), delimiter, quotechar, endline);
             second_columns = second.getNextTableRow();
         }
 
-        return csvFile(std::move(out_file), delimiter, quotechar, endline);
+        return csvFile(std::move(out_file), delimiter, endline, quotechar);
     }
 
     void csvTable::sort(std::ostream& out, const RowComparator &comp) {
@@ -79,18 +93,15 @@ namespace bigCSV{
                 auto tmp_file = tmpFileFactory::get_tmpFile();
                 std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
                 dist_file.trivialSort(of, comp);
-                std::cout<<"printing trivially sorted file"<<std::endl; // Debug
-                dist_file.printColumns(std::cout); // Debug
+                //std::cout<<"printing trivially sorted file"<<std::endl; // Debug
+                //dist_file.printColumns(std::cout); // Debug
                 files1.emplace_back(std::move(tmp_file), delimiter, endline, quotechar);
             }
         }
-        std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
+        //std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
 
-        std::vector<std::string> a;
-        a.push_back("First name");
-        files1[0].printColumns(std::cout, a);
 
-        std::cout<<"Distributed"<<std::endl;
+        //std::cout<<"Distributed"<<std::endl;
 
         // Merge
         auto input_v = &files1;
@@ -98,19 +109,21 @@ namespace bigCSV{
         while(input_v->size() > 1){
             output_v->clear();
             for(int i=1; i<input_v->size(); i+=2){
+                //std::cout<<"Size of input_v = "<<input_v->size()<<std::endl;
                 if(i == input_v->size()) {
                     output_v->emplace_back(std::move((*input_v)[i - 1]));
                 }
                 else{
                     output_v->emplace_back(merge2((*input_v)[i-1],(*input_v)[i],comp));
+                    //std::cout<<"\nFILE:"<<std::endl;
+                    //output_v->front().printColumns(std::cout);
                 }
             }
-            auto help_v = input_v;
-            input_v = output_v;
-            output_v = help_v;
+            //std::cout<<"Size of output = "<<output_v->size()<<std::endl;
+            std::swap(output_v, input_v);
         }
 
-        out<<"Merged"<<std::endl;
+        //out<<"Merged"<<std::endl;
 
         (*input_v)[0].printColumns(out);
     }

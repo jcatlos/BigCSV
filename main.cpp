@@ -14,12 +14,12 @@ int main() {
 
     //std::cout<<std::filesystem::temp_directory_path()<<std::endl;
     bigCSV::csvTable table;
-    table.addStream("input.csv", ',', '\n', '"');
+    table.addStream("input2.csv", ',', '\n', '"');
 
     std::vector<std::string> printed_columns;
-    /*printed_columns.push_back("NazevZarizeni");
-    printed_columns.push_back("Obec");*/
-    printed_columns.push_back("First name");
+    printed_columns.push_back("NazevZarizeni");
+    printed_columns.push_back("Obec");
+    //printed_columns.push_back("First name");
 
     std::cout<<"sorting table"<<std::endl;
     table.sort(std::cout, printed_columns);

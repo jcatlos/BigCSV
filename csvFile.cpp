@@ -14,34 +14,31 @@
 
 namespace bigCSV {
     csvFile::csvFile(const std::filesystem::path& fn, char delim, char le, char q)
-            : delimiter(delim), endline(le), quotechar(q), columns(), file(fn), input_stream()
-    {
-        initialize();
-    }
+        : delimiter(delim), endline(le), quotechar(q), columns(), file(fn), input_stream()
+    {}
 
     csvFile::csvFile(File&& fn, char delim, char le, char q)
-            : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream()
-    {
-        initialize();
-    }
+        : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream()
+    {}
 
     void csvFile::initialize() {
-        open_input_stream(false);
+        //open_input_stream(false);
         col_names = getNextLine();
         column_count = col_names.size();
         for(int i = 0; i<col_names.size(); i++){
             columns[trimmedString(col_names[i])] = i;
         }
-        std::cout<<"Initialized with header "<<formatRow(col_names, delimiter,quotechar,endline)<<std::endl;
-        close_input_stream();
+        //std::cout<<"Initialized with header "<<formatRow(col_names, delimiter,quotechar,endline)<<std::endl;
+        //close_input_stream();
     }
 
     void csvFile::open_input_stream(bool skip_header) {
         input_stream.close();                                           // Close the file if it is opened
         input_stream.open(file.get_path(), std::ifstream::in);
+        initialize();
         if(skip_header){                                                // Removing the heading line
             std::string s;
-            std::getline(input_stream, s, endline);
+            //std::getline(input_stream, s, endline);
         }
     }
 
@@ -55,6 +52,8 @@ namespace bigCSV {
 
         std::string line;
         std::getline(input_stream, line, endline);
+
+        if(line.length() == 0) return out;
 
         //std::cout<<"line = "<<line<<std::endl;
 
@@ -99,6 +98,7 @@ namespace bigCSV {
         auto line = getNextLine();
         TableRow out;
         for(int i=0; i<line.size(); i++){
+            out.empty = false;
             out.map[col_names[i]] = line[i];
             out.schema.push_back(col_names[i]);
             out.values.push_back(line[i]);
@@ -128,13 +128,8 @@ namespace bigCSV {
             else line_mask.push_back(columns[trimmed_col]);
         }
 
-        //for(auto&& m : line_mask) out<<m<<std::endl;
-        //std::cout<<"Mask finished"<<std::endl;
-
-
         std::vector<std::string> out_tokens;
         while(not_eof()){
-            //out<<"i live"<<std::endl;
             line_tokens = getNextLine();
             out_tokens.clear();
             for(auto&& index : line_mask){
@@ -143,7 +138,6 @@ namespace bigCSV {
             }
             out<<formatRow(out_tokens, delimiter, quotechar, endline);
         }
-        std::cout<<"printed"<<std::endl;
         close_input_stream();
     }
 
@@ -178,14 +172,14 @@ namespace bigCSV {
         while(not_eof()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
-            std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
+            //std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
             //std::cout<<header;
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
-            while(not_eof() && file_size < 1000000){      // CHANGE MAX FILE SIZE (for in-memory sort)
+            while(not_eof() && file_size < 10000){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto row = formatRow(getNextLine(), delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;

@@ -15,6 +15,8 @@ namespace bigCSV{
         std::vector<std::string> values;
         std::map<std::string, std::string> map;
 
+        bool empty = true;
+
         void add(const std::string& col_name, const std::string& value);
         //void add(std::string&& col_name, std::string&& value);
         std::vector<std::string> toLine(const std::vector<std::string> &input_schema);
