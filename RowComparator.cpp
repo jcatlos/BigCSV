@@ -3,6 +3,7 @@
 //
 
 #include "RowComparator.hpp"
+#include "helper.hpp"
 
 namespace bigCSV{
 

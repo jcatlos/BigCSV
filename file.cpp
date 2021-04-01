@@ -14,7 +14,7 @@ namespace bigCSV{
     }
 
     File::File(File&& f) noexcept{
-        //std::cout<<"Moving file: " << f.path << std::endl;
+        std::cout<<"Moving file: " << f.path << std::endl;
         path = std::move(f.path);
         temporary = f.temporary;
     }

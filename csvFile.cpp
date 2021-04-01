@@ -32,6 +32,7 @@ namespace bigCSV {
         for(int i = 0; i<col_names.size(); i++){
             columns[trimmedString(col_names[i])] = i;
         }
+        std::cout<<"Initialized with header "<<formatRow(col_names, delimiter,quotechar,endline)<<std::endl;
         close_input_stream();
     }
 
@@ -55,42 +56,42 @@ namespace bigCSV {
         std::string line;
         std::getline(input_stream, line, endline);
 
-        /*
-        // Check if something can be read from the file
-            // Maybe do it before the getline?
-        if(input_stream.peek() == EOF){
-            open = false;
-            return out;
-        }
-         */
-        //if (line.length() == 0) return out;
+        //std::cout<<"line = "<<line<<std::endl;
+
+        // Eat all of the whitespace before the first token
+        std::string::const_iterator line_it = line.begin();
+        while(std::isspace(*line_it) && line_it != line.end()) line_it++;
 
         std::string token = "";
-        for (std::string::const_iterator line_it = line.begin(); line_it != line.end(); line_it++) {
+        while (line_it != line.end()) {
             char c = *line_it;
             // Parse quoted strings
             if (c == quotechar) {
                 token = "";
                 token += getQuotedString(*this, line_it, line, quotechar, endline);
-                c = *line_it;
+                while(std::isspace(*line_it) && line_it != line.end()) line_it++;
                 if(line_it == line.end()) break;
+                c = *line_it;
             }
 
             // An end of a token was found - cannot be else if, because the previous branch may have moved the iterator
             if (c == delimiter) {
                 out.push_back(token);
                 token = "";
+                line_it++;
+                while(std::isspace(*line_it) && line_it != line.end()) line_it++;
             }
 
             // Otherwise just add the character to the token
             else {
                 token += c;
+                line_it++;
             }
         }
 
         // The line must not end with a delimiter, so the last token must be added into the output
         out.push_back(token);
-        
+
         return out;
     }
 
@@ -121,13 +122,14 @@ namespace bigCSV {
 
         std::vector<int> line_mask;
         for(const auto& column : input_columns){
-            std::cout<<"working with column "<<column<<std::endl;
-            if(columns.find(column) == columns.end()) line_mask.push_back(INT32_MAX);
-            else line_mask.push_back(columns[column]);
+            auto trimmed_col = trimmedString(column);
+            //std::cout<<"working with column '"<<column<<"' Changed to '"<<trimmed_col<<"'"<<std::endl;
+            if(columns.find(trimmed_col) == columns.end()) line_mask.push_back(INT32_MAX);
+            else line_mask.push_back(columns[trimmed_col]);
         }
 
-        for(auto&& m : line_mask) out<<m<<std::endl;
-        std::cout<<"Mask finished"<<std::endl;
+        //for(auto&& m : line_mask) out<<m<<std::endl;
+        //std::cout<<"Mask finished"<<std::endl;
 
 
         std::vector<std::string> out_tokens;
@@ -162,13 +164,14 @@ namespace bigCSV {
                 comp
         );
         // Now export the lines into a new file
-            // for now print it
+        out<<formatRow(col_names, delimiter, quotechar, endline);
         for(auto&& line : lines){
             out<<formatRow(line.toLine(col_names), delimiter, quotechar, endline);
         }
     }
 
     std::vector<csvFile> csvFile::distribute() {
+        std::cout<<"calling distribute function"<<std::endl;
         open_input_stream(true);
         std::vector<csvFile> out;
         std::string header = formatRow(col_names, delimiter, quotechar, endline);
@@ -179,20 +182,23 @@ namespace bigCSV {
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
-            std::cout<<header;
+            //std::cout<<header;
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
-            while(input_stream.good() && file_size < 1000000){      // CHANGE MAX FILE SIZE (for in-memory sort)
+            while(not_eof() && file_size < 1000000){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto row = formatRow(getNextLine(), delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
-                std::cout<<row;
+                //std::cout<<row;
             }
             // Close the file and add it to the output
             out_file.close();
             out.emplace_back(std::move(tmp_file), delimiter, endline, quotechar);
         }
         close_input_stream();
+
+        std::cout<<"Distribute finished"<<std::endl;
+
         return out;
     }
 }

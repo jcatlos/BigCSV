@@ -21,11 +21,12 @@ int main() {
     printed_columns.push_back("Obec");*/
     printed_columns.push_back("First name");
 
-    //table.sort(std::cout, printed_columns);
+    std::cout<<"sorting table"<<std::endl;
+    table.sort(std::cout, printed_columns);
 
-    bigCSV::csvFile file("input.csv", ',', '\n', '"');
-    std::cout<<"PRINTING COLUMNS"<<std::endl;
-    file.printColumns(std::cout, printed_columns);
+    //bigCSV::csvFile file("input.csv", ',', '\n', '"');
+    //std::cout<<"PRINTING COLUMNS"<<std::endl;
+    //table.printColumns(std::cout, printed_columns);
     //file.trivialSort(printed_columns);
 
 /*

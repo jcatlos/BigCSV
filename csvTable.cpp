@@ -77,11 +77,14 @@ namespace bigCSV{
             auto dist_files = file.second.distribute();
             for(auto&& dist_file : dist_files){
                 auto tmp_file = tmpFileFactory::get_tmpFile();
-                std::ofstream of(tmp_file.get_path());
+                std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
                 dist_file.trivialSort(of, comp);
-                files1.emplace_back(std::move(tmp_file), delimiter, quotechar, endline);
+                std::cout<<"printing trivially sorted file"<<std::endl; // Debug
+                dist_file.printColumns(std::cout); // Debug
+                files1.emplace_back(std::move(tmp_file), delimiter, endline, quotechar);
             }
         }
+        std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
 
         std::vector<std::string> a;
         a.push_back("First name");
