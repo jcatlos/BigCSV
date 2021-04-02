@@ -31,10 +31,9 @@ namespace bigCSV {
 
     std::string getNextWord(std::string& line, std::string::iterator& it);
 
-    std::vector<std::string> createJoinedSchema (const bigCSV::TableRow& first,const bigCSV::TableRow& second);
+    std::vector<std::string> createJoinedSchema (const std::vector<std::string>& first, const std::vector<std::string>& second);
 
-    bool tautology(const std::vector<std::string>& v);
-
+    int index_of(std::string str, const std::vector<std::string>& arr);
 }
 
 #endif //BIG_CSV_HELPER_HPP

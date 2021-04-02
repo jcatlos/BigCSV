@@ -6,6 +6,7 @@
 #include "helper.hpp"
 #include "tmpFileFactory.hpp"
 #include "RowComparator.hpp"
+#include "Conditions.hpp"
 
 #include <vector>
 #include <fstream>
@@ -15,11 +16,11 @@ namespace bigCSV{
 
     void csvTable::addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar) {
         csvFile file(path, delimiter, endline, quotechar);
+        schema = createJoinedSchema(schema, file.schema);
         input_files.emplace(path, std::move(file));
     }
 
-    // FOR NOW ONLY WORKS ON CONSOLE OUTPUT
-    void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition){
+    void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
         out<<formatRow(input_columns, delimiter, quotechar, endline);
         for(auto&& file: input_files){
             file.second.printColumns(out, input_columns, condition);
@@ -27,13 +28,6 @@ namespace bigCSV{
     }
 
     bigCSV::csvFile csvTable::merge2(csvFile& first, csvFile& second, const RowComparator& comp) const{
-
-        //std::cout<<"Merge started"<<std::endl;
-
-        //std::cout<<"First file:"<<std::endl;
-        //first.printColumns(std::cout);
-        //std::cout<<"Second file:"<<std::endl;
-        //second.printColumns(std::cout);
 
         // Open input files
         first.open_input_stream(true);
@@ -49,7 +43,7 @@ namespace bigCSV{
 
         // Create the table schema
         //std::cout<<"Creating schema"<<std::endl;
-        std::vector<std::string> schema = createJoinedSchema(first_columns, second_columns);
+        std::vector<std::string> schema = createJoinedSchema(first_columns.schema, second_columns.schema);
         //std::cout<<"Joined schema = "<<formatRow(schema, delimiter, quotechar, endline)<<std::endl;
 
         // Open output file
@@ -85,7 +79,7 @@ namespace bigCSV{
         sort(out, comp, tautology);
     }
 
-    void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)> condition) {
+    void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)>& condition) {
         std::vector<csvFile> files1;
         std::vector<csvFile> files2;
 

@@ -23,15 +23,16 @@ namespace bigCSV {
         char endline;
         char quotechar;
         int column_count;
-        std::vector<std::string> col_names;
-
         void initialize();
 
     public:
+
         File file;                      // Move to private when debugged
         std::ifstream input_stream;     // Same
 
         std::map<std::string, int> columns;
+
+        std::vector<std::string> schema;
 
         inline bool not_eof(){
             return input_stream.good() && input_stream.peek() != EOF;
@@ -43,12 +44,12 @@ namespace bigCSV {
         std::vector<std::string> getNextLine();
         TableRow getNextTableRow();
 
-        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition);
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition);
         void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);
         void printColumns(std::ostream& out);
 
         void trivialSort(std::ostream& out, const RowComparator& comp);
-        std::vector<csvFile> distribute(const std::function<bool(const std::vector<std::string>&)> condition);
+        std::vector<csvFile> distribute(const std::function<bool(const std::vector<std::string>&)>& condition);
 
         std::ifstream& get_ifstream();
         void open_input_stream(bool skip_header);

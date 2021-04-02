@@ -5,6 +5,7 @@
 #include "csvFile.hpp"
 #include "helper.hpp"
 #include "tmpFileFactory.hpp"
+#include "Conditions.hpp"
 
 #include <fstream>
 #include <string>
@@ -23,12 +24,12 @@ namespace bigCSV {
 
     void csvFile::initialize() {
         //open_input_stream(false);
-        col_names = getNextLine();
-        column_count = col_names.size();
-        for(int i = 0; i<col_names.size(); i++){
-            columns[trimmedString(col_names[i])] = i;
+        schema = getNextLine();
+        column_count = schema.size();
+        for(int i = 0; i < schema.size(); i++){
+            columns[trimmedString(schema[i])] = i;
         }
-        //std::cout<<"Initialized with header "<<formatRow(col_names, delimiter,quotechar,endline)<<std::endl;
+        //std::cout<<"Initialized with header "<<formatRow(schema, delimiter,quotechar,endline)<<std::endl;
         //close_input_stream();
     }
 
@@ -99,8 +100,8 @@ namespace bigCSV {
         TableRow out;
         for(int i=0; i<line.size(); i++){
             out.empty = false;
-            out.map[col_names[i]] = line[i];
-            out.schema.push_back(col_names[i]);
+            out.map[schema[i]] = line[i];
+            out.schema.push_back(schema[i]);
             out.values.push_back(line[i]);
 
         }
@@ -109,14 +110,14 @@ namespace bigCSV {
     }
 
     void csvFile::printColumns(std::ostream& out) {
-        printColumns(out, col_names);
+        printColumns(out, schema);
     }
 
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns) {
         printColumns(out, input_columns, tautology);
     }
 
-    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition) {
+    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition) {
         open_input_stream(true);
         // Printing the first row
         std::vector<std::string> line_tokens;
@@ -164,21 +165,21 @@ namespace bigCSV {
                 comp
         );
         // Now export the lines into a new file
-        out<<formatRow(col_names, delimiter, quotechar, endline);
+        out<<formatRow(schema, delimiter, quotechar, endline);
         for(auto&& line : lines){
-            out<<formatRow(line.toLine(col_names), delimiter, quotechar, endline);
+            out<<formatRow(line.toLine(schema), delimiter, quotechar, endline);
         }
     }
 
-    std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)> condition) {
+    std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)>& condition) {
         std::cout<<"calling distribute function"<<std::endl;
         open_input_stream(true);
         std::vector<csvFile> out;
-        std::string header = formatRow(col_names, delimiter, quotechar, endline);
+        std::string header = formatRow(schema, delimiter, quotechar, endline);
         while(not_eof()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
-            std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
+            //std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;

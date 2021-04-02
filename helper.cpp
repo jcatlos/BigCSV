@@ -9,6 +9,7 @@
 #include <ctime>
 #include <random>
 #include <cstdio>
+#include <set>
 
 #include "helper.hpp"
 #include "csvFile.hpp"
@@ -96,25 +97,38 @@ namespace bigCSV{
     std::string getNextWord(std::string& line, std::string::iterator& it){
         std::string out = "";
         while(it != line.end() && isspace(*it)) it++;        // Take all the whitespace before the next word
-        while(it != line.end() && !isspace(*it)){
-            out += *it;
+        bool quoted = *it == '"';
+        if(quoted){
             it++;
+            while(it != line.end() && *it != '"'){
+                out += *it;
+                it++;
+            }
+            it++;
+        }
+        else{
+            while(it != line.end() && !isspace(*it)){
+                out += *it;
+                it++;
+            }
         }
         return out;
     }
 
-    std::vector<std::string> createJoinedSchema (const bigCSV::TableRow& first,
-                                                 const bigCSV::TableRow& second){
+    std::vector<std::string> createJoinedSchema (const std::vector<std::string>& first,
+                                                 const std::vector<std::string>& second){
         std::vector<std::string> out;
+        std::set<std::string> present;
 
         // Insert all of the columns of the first schema
-        for(auto&& col : first.schema){
+        for(auto&& col : first){
             out.push_back(col);
+            present.insert(col);
         }
 
         // Insert all columns from the second schema that were no already inserted
-        for(auto&& col : second.schema){
-            if(first.map.find(col) == first.map.end()){
+        for(auto&& col : second){
+            if(present.find(col) == present.end()){
                 out.push_back(col);
             }
         }
@@ -122,8 +136,11 @@ namespace bigCSV{
         return out;
     }
 
-    bool tautology(const std::vector<std::string> &v) {
-        return true;
+    int index_of(std::string str, const std::vector<std::string> &arr) {
+        for(int i=0; i<arr.size(); i++){
+            if(arr[i] == str) return i;
+        }
+        return -1;
     }
 
     /*bigCSV::csvFile merge(std::vector<bigCSV::csvFile>& input_files){

@@ -27,16 +27,17 @@ namespace bigCSV{
 
     public:
 
+        std::vector<std::string> schema;
 
         csvTable(char delim, char qchar, char endl)
             : delimiter(delim), quotechar(qchar), endline(endl){}
         csvTable()
             : delimiter(','), quotechar('"'), endline('\n'){}
 
-        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition);
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition);
 
         void sort(std::ostream& out, const RowComparator& comp);
-        void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)> condition);
+        void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)>& condition);
 
         void addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
 
