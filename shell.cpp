@@ -80,8 +80,12 @@ namespace bigCSV {
             else if(word == "SELECT") {
 
                 std::cout<<"SELECT"<<std::endl;
-
+                bool sort = false;
+                bool from_file;
+                RowComparator comparator((std::vector<std::string>()));
                 std::vector<std::string> selected_columns;
+                std::ofstream file_stream;
+
                 int index = 1;                                          // Current position in the command;
                 for(;command[index] != "FROM"; index++){
                     if(index == command.size()){
@@ -107,28 +111,58 @@ namespace bigCSV {
 
                 std::function<bool(const std::vector<std::string>&)> condition = tautology;
 
-                /*
                 // Now the voluntary parts
                 // WHERE - Now only 1 condition
 
-                if(command[index] == "WHERE"){
+                // Check for WHERE clause
+                if(index < command.size() && command[index] == "WHERE") {
+                    index++;
                     auto pair = split(command[index], '=');
-                    if(pair.size() != 2){
-                        std::cout<<"ERROR Malformed condition: "<<command[index]<<std::endl;
+                    if (pair.size() != 2) {
+                        std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
                         return;
                     }
                     int col_index = index_of(pair[0], selected_columns);
-                    if(col_index < 0){
-                        std::cout<<"ERROR "<<pair[0]<<" not in selected values"<<std::endl;
+                    if (col_index < 0) {
+                        std::cout << "ERROR " << pair[0] << " not in selected values" << std::endl;
                         return;
                     }
                     condition = create_equal_check(col_index, pair[1]);
-            }*/
+                    index++;
+                }
+                // Check for ORDER BY clause
+                if(index < command.size() && command[index] == "ORDER"){
+                    index++;
+                    if(command[index] == "BY") index++;     // Skip "BY"
+                    sort = true;
+                    std::vector<std::string> order_by;
+                    while(index<command.size() && command[index] != "INTO"){
+                        std::cout<<command[index]<<std::endl;
+                        order_by.push_back(command[index]);
+                        index++;
+                    }
+                    comparator = RowComparator(std::move(order_by));
+                }
+                // Check for "INTO" clause
+                if(index < command.size() && command[index] == "INTO"){
+                    index++;
+                    from_file = false;
+                    file_stream.open(command[index]);
+                    index++;
+                }
+
+                if(index < command.size()){
+                    std::cout<<"Error: Malformed SELECT query" <<std::endl;
+                    return;
+                }
 
                 std::cout<<"Launching Query"<<std::endl;
 
-                // Prints the results on terminal
-                table.printColumns(std::cout, selected_columns, condition);
+                std::ostream& out = (from_file ? file_stream : std::cout);
+                if(sort){
+                    table.sort(out, comparator, condition);
+                }
+                else table.printColumns(out, selected_columns, condition);
 
 
             }
