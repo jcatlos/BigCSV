@@ -33,6 +33,8 @@ namespace bigCSV {
 
     std::vector<std::string> createJoinedSchema (const bigCSV::TableRow& first,const bigCSV::TableRow& second);
 
+    bool tautology(const std::vector<std::string>& v);
+
 }
 
 #endif //BIG_CSV_HELPER_HPP

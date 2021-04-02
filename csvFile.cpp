@@ -113,6 +113,10 @@ namespace bigCSV {
     }
 
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns) {
+        printColumns(out, input_columns, tautology);
+    }
+
+    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition) {
         open_input_stream(true);
         // Printing the first row
         std::vector<std::string> line_tokens;
@@ -136,7 +140,9 @@ namespace bigCSV {
                 if(line_tokens.size() <= index) out_tokens.push_back("");
                 else out_tokens.push_back(line_tokens[index]);
             }
-            out<<formatRow(out_tokens, delimiter, quotechar, endline);
+            if(condition(out_tokens)){
+                out<<formatRow(out_tokens, delimiter, quotechar, endline);
+            }
         }
         close_input_stream();
     }
@@ -164,7 +170,7 @@ namespace bigCSV {
         }
     }
 
-    std::vector<csvFile> csvFile::distribute() {
+    std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)> condition) {
         std::cout<<"calling distribute function"<<std::endl;
         open_input_stream(true);
         std::vector<csvFile> out;
@@ -172,7 +178,7 @@ namespace bigCSV {
         while(not_eof()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
-            //std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
+            std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
@@ -180,7 +186,9 @@ namespace bigCSV {
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
             while(not_eof() && file_size < 13500){      // CHANGE MAX FILE SIZE (for in-memory sort)
-                auto row = formatRow(getNextLine(), delimiter, quotechar, endline);
+                auto line = getNextLine();
+                if(!condition(line)) continue;
+                auto row = formatRow(line, delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
                 //std::cout<<row;

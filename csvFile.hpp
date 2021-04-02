@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <filesystem>
+#include <functional>
 
 #include "file.hpp"
 #include "TableRow.hpp"
@@ -42,10 +43,12 @@ namespace bigCSV {
         std::vector<std::string> getNextLine();
         TableRow getNextTableRow();
 
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition);
         void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);
         void printColumns(std::ostream& out);
+
         void trivialSort(std::ostream& out, const RowComparator& comp);
-        std::vector<csvFile> distribute();
+        std::vector<csvFile> distribute(const std::function<bool(const std::vector<std::string>&)> condition);
 
         std::ifstream& get_ifstream();
         void open_input_stream(bool skip_header);

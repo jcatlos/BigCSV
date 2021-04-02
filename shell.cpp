@@ -68,6 +68,23 @@ namespace bigCSV {
 
         }
         else if(word == "SELECT") {
+            std::vector<std::string> selected_columns;
+            int index;                                          // Current position in the command;
+            for(; command[index] != "FROM"; index++){
+                selected_columns.push_back(command[index]);
+            }
+            index++;                                            // Skip the "FROM" token
+            // Find the specified table
+            csvTable table;
+            if(tables.find(command[index]) == tables.end()){
+                std::cout<<"ERROR Table "<<command[index]<<" Not found" << std::endl;
+                return;
+            }
+            else {
+                //table = &tables[command[index]];
+            }
+
+            // WHERE
 
         }
         else {

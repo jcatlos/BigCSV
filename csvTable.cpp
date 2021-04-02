@@ -13,17 +13,16 @@
 
 namespace bigCSV{
 
-    // REMOVE THE EXTENDS?
     void csvTable::addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar) {
         csvFile file(path, delimiter, endline, quotechar);
         input_files.emplace(path, std::move(file));
     }
 
     // FOR NOW ONLY WORKS ON CONSOLE OUTPUT
-    void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns){
+    void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition){
         out<<formatRow(input_columns, delimiter, quotechar, endline);
         for(auto&& file: input_files){
-            file.second.printColumns(out, input_columns);
+            file.second.printColumns(out, input_columns, condition);
         }
     }
 
@@ -83,12 +82,16 @@ namespace bigCSV{
     }
 
     void csvTable::sort(std::ostream& out, const RowComparator &comp) {
+        sort(out, comp, tautology);
+    }
+
+    void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)> condition) {
         std::vector<csvFile> files1;
         std::vector<csvFile> files2;
 
         // Distribute input_files and save them into files1
         for(auto&& file : input_files){
-            auto dist_files = file.second.distribute();
+            auto dist_files = file.second.distribute(condition);
             for(auto&& dist_file : dist_files){
                 auto tmp_file = tmpFileFactory::get_tmpFile();
                 std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
@@ -101,7 +104,7 @@ namespace bigCSV{
         //std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
 
 
-        //std::cout<<"Distributed"<<std::endl;
+        std::cout<<"Distributed"<<std::endl;
 
         // Merge
         auto input_v = &files1;

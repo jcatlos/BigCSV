@@ -33,9 +33,10 @@ namespace bigCSV{
         csvTable()
             : delimiter(','), quotechar('"'), endline('\n'){}
 
-        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);// IMPLEMENT
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)> condition);
 
-        void sort(std::ostream& out, const RowComparator& comp); // IMPLEMENT
+        void sort(std::ostream& out, const RowComparator& comp);
+        void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)> condition);
 
         void addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
 

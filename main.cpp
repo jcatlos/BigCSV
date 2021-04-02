@@ -7,7 +7,11 @@
 #include "csvTable.hpp"
 #include "tmpFileFactory.hpp"
 #include "file.hpp"
+#include "helper.hpp"
 
+bool equals(const std::vector<std::string>& col){
+    return col[5]=="Praha 2";
+}
 
 int main() {
 
@@ -21,8 +25,10 @@ int main() {
     printed_columns.push_back("Obec");
     //printed_columns.push_back("First name");
 
-    std::cout<<"sorting table"<<std::endl;
-    table.sort(std::cout, printed_columns);
+    //std::cout<<"sorting table"<<std::endl;
+    table.sort(std::cout, printed_columns, equals);
+
+    //table.printColumns(std::cout, printed_columns, bigCSV::tautology);
 
     //bigCSV::csvFile file("input.csv", ',', '\n', '"');
     //std::cout<<"PRINTING COLUMNS"<<std::endl;

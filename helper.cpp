@@ -122,6 +122,10 @@ namespace bigCSV{
         return out;
     }
 
+    bool tautology(const std::vector<std::string> &v) {
+        return true;
+    }
+
     /*bigCSV::csvFile merge(std::vector<bigCSV::csvFile>& input_files){
 
     }*/
