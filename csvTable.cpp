@@ -76,10 +76,10 @@ namespace bigCSV{
     }
 
     void csvTable::sort(std::ostream& out, const RowComparator &comp) {
-        sort(out, comp, tautology);
+        sort(out, comp, tautology, schema);
     }
 
-    void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)>& condition) {
+    void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)>& condition, const std::vector<std::string>& columns) {
         std::vector<csvFile> files1;
         std::vector<csvFile> files2;
 
@@ -122,7 +122,7 @@ namespace bigCSV{
 
         //out<<"Merged"<<std::endl;
 
-        (*input_v)[0].printColumns(out);
+        (*input_v)[0].printColumns(out,columns);
     }
 
 }

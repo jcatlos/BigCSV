@@ -83,14 +83,14 @@ namespace bigCSV{
         return out;
     }
 
-    bool setAttribute(const std::string& pair, std::map<std::string, std::string> attributes){
+    bool setAttribute(const std::string& pair, std::map<std::string, char>& attributes){
         auto result = split(pair, '=');
         // Invalid form of attribute setting
         if(result.size() != 2) return false;
         auto key_it = attributes.find(result[0]);
         // Invalid attribute name
         if(key_it == attributes.end()) return false;
-        key_it->second = result[1];
+        key_it->second = result[1][0];
         return true;
     }
 

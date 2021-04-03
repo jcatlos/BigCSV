@@ -27,7 +27,7 @@ namespace bigCSV {
 
     std::vector<std::string> split(const std::string& in, const char delim);
 
-    bool setAttribute(const std::string& pair, std::map<std::string, std::string> attributes);
+    bool setAttribute(const std::string& pair, std::map<std::string, char>& attributes);
 
     std::string getNextWord(std::string& line, std::string::iterator& it);
 

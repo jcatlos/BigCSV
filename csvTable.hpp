@@ -18,14 +18,14 @@
 namespace bigCSV{
     class csvTable{
 
-        char delimiter;
-        char quotechar;
-        char endline;
-
         std::map<std::filesystem::path, csvFile> input_files;
         //std::map<std::string, int> columns;
 
     public:
+
+        char delimiter;
+        char quotechar;
+        char endline;
 
         std::vector<std::string> schema;
 
@@ -37,7 +37,7 @@ namespace bigCSV{
         void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition);
 
         void sort(std::ostream& out, const RowComparator& comp);
-        void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)>& condition);
+        void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)>& condition, const std::vector<std::string>& columns);
 
         void addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
 

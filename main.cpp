@@ -13,7 +13,8 @@
 
 int main() {
 
-    bigCSV::run(std::cin);
+    bigCSV::Shell shell;
+    shell.run(std::cin);
     //std::cout<<std::filesystem::temp_directory_path()<<std::endl;
     /*bigCSV::csvTable table;
     table.addStream("input2.csv", ',', '\n', '"');
