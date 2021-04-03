@@ -114,10 +114,10 @@ namespace bigCSV {
     }
 
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns) {
-        printColumns(out, input_columns, tautology);
+        printColumns(out, input_columns, tautology, delimiter, quotechar, endline);
     }
 
-    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition) {
+    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition, char out_delimiter, char out_quotechar, char out_endline) {
         open_input_stream(true);
         // Printing the first row
         std::vector<std::string> line_tokens;
@@ -142,7 +142,7 @@ namespace bigCSV {
                 else out_tokens.push_back(line_tokens[index]);
             }
             if(condition(out_tokens)){
-                out<<formatRow(out_tokens, delimiter, quotechar, endline);
+                out<<formatRow(out_tokens, out_delimiter, out_quotechar, out_endline);
             }
         }
         close_input_stream();

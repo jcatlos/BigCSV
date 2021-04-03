@@ -15,7 +15,20 @@ namespace bigCSV {
         atts["DELIMITER"] = ',';
         atts["QUOTECHAR"] = '"';
         atts["ENDLINE"] = '\n';
+        atts["OUT_DELIMITER"] = ',';
+        atts["OUT_QUOTECHAR"] = '"';
+        atts["OUT_ENDLINE"] = '\n';
 
+        if(modify_attribute_map(index, atts)){
+            return atts;
+        }
+        else{
+            return std::map<std::string, char>();
+        }
+
+    }
+
+    bool Shell::modify_attribute_map(int& index, std::map<std::string, char>& atts){
         // If there are attributes to be parsed, parse them
         if(index < command.size() && command[index] == "SET"){
             int start_index = index;
@@ -23,12 +36,11 @@ namespace bigCSV {
             for(;index<command.size(); index++){
                 if(!bigCSV::setAttribute(command[index], atts)){
                     std::cout<<"Problem with attribute "<<index - start_index<<std::endl;
-                    return std::map<std::string, char>();
+                    return false;
                 }
             }
         }
-
-        return atts;
+        return true;
     }
 
     void Shell::get_command(std::istream &in) {
@@ -54,27 +66,11 @@ namespace bigCSV {
 
         int index = 3;
         std::map<std::string, char> table_attributes = get_attribute_map(index);
-        
-       /* table_attributes["DELIMITER"] = ",";
-        table_attributes["QUOTECHAR"] = "\"";
-        table_attributes["ENDLINE"] = "\n";
 
-
-        if(command.size() > 3){
-            if(command[3] == "SET"){
-                for(int i=4; i<command.size(); i++){
-                    if(!bigCSV::setAttribute(command[i], table_attributes)){
-                        std::cout<<"Problem with attribute "<<i<<std::endl;
-                        return;
-                    }
-                }
-            }
-            else{
-                std::cout<<"Error: Malformed CREATE TABLE query" <<std::endl;
-                return;
-            }
-        }*/
-
+        if(table_attributes.empty()){
+            std::cout<<"Problems occured during attribute parsing, Aborting CREATE"<<std::endl;
+            return;
+        }
 
         tables[table_name] = bigCSV::csvTable(
                 table_attributes["DELIMITER"],
@@ -176,7 +172,7 @@ namespace bigCSV {
 
         std::cout<<"INSERT STARTED"<<std::endl;
 
-        if(command.size() < 5 && (command[1] != "INTO" || command[3] != "PATH") ){
+        if(command.size() < 5 || command[1] != "INTO" || command[3] != "PATH" ){
             std::cout<<"Invalid command form";
             return;
         }
@@ -193,24 +189,11 @@ namespace bigCSV {
 
         int index = 5;
         std::map<std::string, char> table_attributes = get_attribute_map(index);
-        /*table_attributes["DELIMITER"] = ",";
-        table_attributes["QUOTECHAR"] = "\"";
-        table_attributes["ENDLINE"] = "\n";
 
-        if(command.size() > 5){
-            if(command[5] == "SET"){
-                for(int i=6; i<command.size(); i++){
-                    if(!bigCSV::setAttribute(command[i], table_attributes)){
-                        std::cout<<"Problem with attribute "<<i<<std::endl;
-                        return;
-                    }
-                }
-            }
-            else{
-                std::cout<<"Error: Malformed INSERT INTO query" <<std::endl;
-                return;
-            }
-        }*/
+        if(table_attributes.empty()){
+            std::cout<<"Problems occured during attribute parsing, Aborting INSERT INTO"<<std::endl;
+            return;
+        }
 
         tables[table_name].addStream(path, table_attributes["DELIMITER"], table_attributes["ENDLINE"], table_attributes["QUOTECHAR"]);
 
@@ -222,12 +205,44 @@ namespace bigCSV {
 
     void Shell::alter(){
         std::cout<<"ALTER"<<std::endl;
+
+        if(command.size() < 3 || command[1] != "TABLE"){
+            std::cout<<"Invalid command form";
+            return;
+        }
+
+        // Find the specified table
+        std::string table_name = command[2];
+        auto table_it = tables.find(table_name);
+        if(table_it == tables.end()){
+            std::cout<<"Error: Table \""<<table_name<<"\" Not found"<<std::endl;
+            return;
+        }
+        auto& table = tables[table_name];
+
+        int index = 3;
+        std::map<std::string, char>table_attributes;
+        table_attributes["DELIMITER"] = table.delimiter;
+        table_attributes["QUOTECHAR"] = table.quotechar;
+        table_attributes["ENDLINE"] = table.endline;
+        table_attributes["OUT_DELIMITER"] = table.out_delimiter;
+        table_attributes["OUT_QUOTECHAR"] = table.out_quotechar;
+        table_attributes["OUT_ENDLINE"] = table.out_endline;
+
+        if(!modify_attribute_map(index, table_attributes)){
+            std::cout<<"Problems occured during attribute parsing, Aborting ALTER"<<std::endl;
+            return;
+        }
+
+        table.delimiter = table_attributes["DELIMITER"];
+        table.quotechar = table_attributes["QUOTECHAR"];
+        table.endline = table_attributes["ENDLINE"];
+        table.out_delimiter = table_attributes["OUT_DELIMITER"];
+        table.out_quotechar = table_attributes["OUT_QUOTECHAR"];
+        table.out_endline = table_attributes["OUT_ENDLINE"];
     }
 
     void Shell::run(std::istream& in){
-
-        //tables["test"] = bigCSV::csvTable();
-        //tables["test"].addStream("input2.csv", ',', '\n', '"');
 
         while(true){
             get_command(in);

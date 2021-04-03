@@ -44,7 +44,7 @@ namespace bigCSV {
         std::vector<std::string> getNextLine();
         TableRow getNextTableRow();
 
-        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition);
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition, char out_delimiter, char out_quotechar, char out_endline);
         void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);
         void printColumns(std::ostream& out);
 

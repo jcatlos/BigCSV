@@ -19,13 +19,13 @@ namespace bigCSV {
         void get_command(std::istream& in);
 
         std::map<std::string, char> get_attribute_map(int& index);
+        bool modify_attribute_map(int& index, std::map<std::string, char>& atts);
 
         void create();
         void select();
         void insert();
         void alter();
         void update();
-
 
     };
 }

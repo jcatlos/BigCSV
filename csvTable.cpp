@@ -23,7 +23,7 @@ namespace bigCSV{
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
         out<<formatRow(input_columns, delimiter, quotechar, endline);
         for(auto&& file: input_files){
-            file.second.printColumns(out, input_columns, condition);
+            file.second.printColumns(out, input_columns, condition, out_delimiter, out_quotechar, out_endline);
         }
     }
 
@@ -120,9 +120,9 @@ namespace bigCSV{
             std::swap(output_v, input_v);
         }
 
-        //out<<"Merged"<<std::endl;
+        out<<"Merged"<<std::endl;
 
-        (*input_v)[0].printColumns(out,columns);
+        (*input_v)[0].printColumns(out,columns,tautology, out_delimiter, out_quotechar, out_endline);
     }
 
 }
