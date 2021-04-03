@@ -222,9 +222,9 @@ namespace bigCSV {
 
         int index = 3;
         std::map<std::string, char>table_attributes;
-        table_attributes["DELIMITER"] = table.delimiter;
-        table_attributes["QUOTECHAR"] = table.quotechar;
-        table_attributes["ENDLINE"] = table.endline;
+        table_attributes["DELIMITER"] = table.in_delimiter;
+        table_attributes["QUOTECHAR"] = table.in_quotechar;
+        table_attributes["ENDLINE"] = table.in_endline;
         table_attributes["OUT_DELIMITER"] = table.out_delimiter;
         table_attributes["OUT_QUOTECHAR"] = table.out_quotechar;
         table_attributes["OUT_ENDLINE"] = table.out_endline;
@@ -234,9 +234,9 @@ namespace bigCSV {
             return;
         }
 
-        table.delimiter = table_attributes["DELIMITER"];
-        table.quotechar = table_attributes["QUOTECHAR"];
-        table.endline = table_attributes["ENDLINE"];
+        table.in_delimiter = table_attributes["DELIMITER"];
+        table.in_quotechar = table_attributes["QUOTECHAR"];
+        table.in_endline = table_attributes["ENDLINE"];
         table.out_delimiter = table_attributes["OUT_DELIMITER"];
         table.out_quotechar = table_attributes["OUT_QUOTECHAR"];
         table.out_endline = table_attributes["OUT_ENDLINE"];

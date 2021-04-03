@@ -21,7 +21,7 @@ namespace bigCSV{
     }
 
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
-        out<<formatRow(input_columns, delimiter, quotechar, endline);
+        out<<formatRow(input_columns, in_delimiter, in_quotechar, in_endline);
         for(auto&& file: input_files){
             file.second.printColumns(out, input_columns, condition, out_delimiter, out_quotechar, out_endline);
         }
@@ -44,35 +44,35 @@ namespace bigCSV{
         // Create the table schema
         //std::cout<<"Creating schema"<<std::endl;
         std::vector<std::string> schema = createJoinedSchema(first_columns.schema, second_columns.schema);
-        //std::cout<<"Joined schema = "<<formatRow(schema, delimiter, quotechar, endline)<<std::endl;
+        //std::cout<<"Joined schema = "<<formatRow(schema, in_delimiter, in_quotechar, in_endline)<<std::endl;
 
         // Open output file
         bigCSV::File out_file = tmpFileFactory::get_tmpFile();
         std::ofstream out_stream(out_file.get_path(), std::ofstream::trunc);
-        out_stream<<formatRow(schema, delimiter, quotechar, endline);
+        out_stream<<formatRow(schema, in_delimiter, in_quotechar, in_endline);
 
 
         // Merge
         while(!first_columns.empty && !second_columns.empty){
             if(comp(first_columns, second_columns)){
-                out_stream<<formatRow(first_columns.toLine(schema), delimiter, quotechar, endline);
+                out_stream<<formatRow(first_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
                 first_columns = first.getNextTableRow();
             }
             else{
-                out_stream<<formatRow(second_columns.toLine(schema), delimiter, quotechar, endline);
+                out_stream<<formatRow(second_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
                 second_columns = second.getNextTableRow();
             }
         }
         while(!first_columns.empty){
-            out_stream<<formatRow(first_columns.toLine(schema), delimiter, quotechar, endline);
+            out_stream<<formatRow(first_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
             first_columns = first.getNextTableRow();
         }
         while(!second_columns.empty){
-            out_stream<<formatRow(second_columns.toLine(schema), delimiter, quotechar, endline);
+            out_stream<<formatRow(second_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
             second_columns = second.getNextTableRow();
         }
 
-        return csvFile(std::move(out_file), delimiter, endline, quotechar);
+        return csvFile(std::move(out_file), in_delimiter, in_endline, in_quotechar);
     }
 
     void csvTable::sort(std::ostream& out, const RowComparator &comp) {
@@ -92,7 +92,7 @@ namespace bigCSV{
                 dist_file.trivialSort(of, comp);
                 //std::cout<<"printing trivially sorted file"<<std::endl; // Debug
                 //dist_file.printColumns(std::cout); // Debug
-                files1.emplace_back(std::move(tmp_file), delimiter, endline, quotechar);
+                files1.emplace_back(std::move(tmp_file), in_delimiter, in_endline, in_quotechar);
             }
         }
         //std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;

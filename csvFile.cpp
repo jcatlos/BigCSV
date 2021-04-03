@@ -29,7 +29,7 @@ namespace bigCSV {
         for(int i = 0; i < schema.size(); i++){
             columns[trimmedString(schema[i])] = i;
         }
-        //std::cout<<"Initialized with header "<<formatRow(schema, delimiter,quotechar,endline)<<std::endl;
+        //std::cout<<"Initialized with header "<<formatRow(schema, in_delimiter,in_quotechar,in_endline)<<std::endl;
         //close_input_stream();
     }
 
@@ -39,7 +39,7 @@ namespace bigCSV {
         initialize();
         if(skip_header){                                                // Removing the heading line
             std::string s;
-            //std::getline(input_stream, s, endline);
+            //std::getline(input_stream, s, in_endline);
         }
     }
 
@@ -89,7 +89,7 @@ namespace bigCSV {
             }
         }
 
-        // The line must not end with a delimiter, so the last token must be added into the output
+        // The line must not end with a in_delimiter, so the last token must be added into the output
         out.push_back(token);
 
         return out;
@@ -123,7 +123,7 @@ namespace bigCSV {
         std::vector<std::string> line_tokens;
 
         // Not needed, pinted in table
-        //std::cout<<formatRow(input_columns, delimiter, quotechar, endline);
+        //std::cout<<formatRow(input_columns, in_delimiter, in_quotechar, in_endline);
 
         std::vector<int> line_mask;
         for(const auto& column : input_columns){

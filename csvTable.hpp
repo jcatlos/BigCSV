@@ -23,9 +23,9 @@ namespace bigCSV{
 
     public:
 
-        char delimiter;
-        char quotechar;
-        char endline;
+        char in_delimiter;
+        char in_quotechar;
+        char in_endline;
 
         char out_delimiter;
         char out_quotechar;
@@ -34,9 +34,9 @@ namespace bigCSV{
         std::vector<std::string> schema;
 
         csvTable(char delim, char qchar, char endl)
-            : delimiter(delim), quotechar(qchar), endline(endl), out_delimiter(delim), out_quotechar(qchar), out_endline(endl){}
+            : in_delimiter(delim), in_quotechar(qchar), in_endline(endl), out_delimiter(delim), out_quotechar(qchar), out_endline(endl){}
         csvTable()
-            : delimiter(','), quotechar('"'), endline('\n'), out_delimiter(','), out_quotechar('"'), out_endline('\n'){}
+            : in_delimiter(','), in_quotechar('"'), in_endline('\n'), out_delimiter(','), out_quotechar('"'), out_endline('\n'){}
 
         void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition);
 
