@@ -2,19 +2,13 @@
 // Created by jakub on 15. 3. 2021.
 //
 
-#include <sstream>
-
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
 #include <random>
-#include <cstdio>
 #include <set>
 
 #include "helper.hpp"
 #include "csvFile.hpp"
-#include "tmpFileFactory.hpp"
-#include "RowComparator.hpp"
+
 
 namespace bigCSV{
     std::string trimmedString(const std::string& str){

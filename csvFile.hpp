@@ -9,14 +9,17 @@
 #include <filesystem>
 #include <functional>
 
-#include "file.hpp"
-#include "TableRow.hpp"
-#include "RowComparator.hpp"
 
 #ifndef BIG_CSV_CSVFILE_HPP
 #define BIG_CSV_CSVFILE_HPP
 
+#include "file.hpp"
+#include "TableRow.hpp"
+#include "RowComparator.hpp"
+
 namespace bigCSV {
+    class csvTable;
+
     class csvFile {
         // As these 3 are defined at the file-level, they have to be stored at each instance of file
         char delimiter;
@@ -25,6 +28,7 @@ namespace bigCSV {
         int column_count;
         void initialize();
 
+        friend csvTable;
     public:
 
         File file;                      // Move to private when debugged
@@ -33,6 +37,11 @@ namespace bigCSV {
         std::map<std::string, int> columns;
 
         std::vector<std::string> schema;
+
+        inline void init_file(){
+            open_input_stream();
+            close_input_stream();
+        }
 
         inline bool not_eof(){
             return input_stream.good() && input_stream.peek() != EOF;
@@ -51,8 +60,7 @@ namespace bigCSV {
         void trivialSort(std::ostream& out, const RowComparator& comp);
         std::vector<csvFile> distribute(const std::function<bool(const std::vector<std::string>&)>& condition);
 
-        std::ifstream& get_ifstream();
-        void open_input_stream(bool skip_header);
+        void open_input_stream();
 
         void close_input_stream();
     };

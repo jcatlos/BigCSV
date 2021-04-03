@@ -82,7 +82,7 @@ namespace bigCSV {
     void Shell::select() {
         std::cout<<"SELECT"<<std::endl;
         bool sort = false;
-        bool from_file;
+        bool to_file = false;
         RowComparator comparator((std::vector<std::string>()));
         std::vector<std::string> selected_columns;
         std::ofstream file_stream;
@@ -123,11 +123,12 @@ namespace bigCSV {
                 std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
                 return;
             }
-            int col_index = index_of(pair[0], selected_columns);
+            int col_index = index_of(pair[0], table.schema);
             if (col_index < 0) {
-                std::cout << "ERROR " << pair[0] << " not in selected values" << std::endl;
+                std::cout << "ERROR " << pair[0] << " not in column" << std::endl;
                 return;
             }
+            std::cout<<"value = '"<<pair[1]<<"'"<<std::endl;
             condition = create_equal_check(col_index, pair[1]);
             index++;
         }
@@ -147,7 +148,7 @@ namespace bigCSV {
         // Check for "INTO" clause
         if(index < command.size() && command[index] == "INTO"){
             index++;
-            from_file = false;
+            to_file = true;
             file_stream.open(command[index]);
             index++;
         }
@@ -159,7 +160,7 @@ namespace bigCSV {
 
         std::cout<<"Launching Query"<<std::endl;
 
-        std::ostream& out = (from_file ? file_stream : std::cout);
+        std::ostream& out = (to_file ? file_stream : std::cout);
         if(sort){
             table.sort(out, comparator, condition, selected_columns);
         }
@@ -188,14 +189,15 @@ namespace bigCSV {
         }
 
         int index = 5;
-        std::map<std::string, char> table_attributes = get_attribute_map(index);
+        std::map<std::string, char> file_attributes = get_attribute_map(index);
+        //std::cout<<"att = "<<table_attributes["QUOTECHAR"]<<std::endl;
 
-        if(table_attributes.empty()){
+        if(file_attributes.empty()){
             std::cout<<"Problems occured during attribute parsing, Aborting INSERT INTO"<<std::endl;
             return;
         }
 
-        tables[table_name].addStream(path, table_attributes["DELIMITER"], table_attributes["ENDLINE"], table_attributes["QUOTECHAR"]);
+        tables[table_name].addStream(path, file_attributes["DELIMITER"], file_attributes["ENDLINE"], file_attributes["QUOTECHAR"]);
 
     }
 

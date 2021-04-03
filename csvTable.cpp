@@ -16,12 +16,13 @@ namespace bigCSV{
 
     void csvTable::addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar) {
         csvFile file(path, delimiter, endline, quotechar);
+        file.init_file();
         schema = createJoinedSchema(schema, file.schema);
         input_files.emplace(path, std::move(file));
     }
 
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
-        out<<formatRow(input_columns, in_delimiter, in_quotechar, in_endline);
+        out<<formatRow(input_columns, out_delimiter, out_quotechar, out_endline);
         for(auto&& file: input_files){
             file.second.printColumns(out, input_columns, condition, out_delimiter, out_quotechar, out_endline);
         }
@@ -30,8 +31,8 @@ namespace bigCSV{
     bigCSV::csvFile csvTable::merge2(csvFile& first, csvFile& second, const RowComparator& comp) const{
 
         // Open input files
-        first.open_input_stream(true);
-        second.open_input_stream(true);
+        first.open_input_stream();
+        second.open_input_stream();
 
         //std::cout<<"Files opened"<<std::endl;
 
@@ -92,7 +93,7 @@ namespace bigCSV{
                 dist_file.trivialSort(of, comp);
                 //std::cout<<"printing trivially sorted file"<<std::endl; // Debug
                 //dist_file.printColumns(std::cout); // Debug
-                files1.emplace_back(std::move(tmp_file), in_delimiter, in_endline, in_quotechar);
+                files1.emplace_back(std::move(tmp_file), dist_file.delimiter, dist_file.endline, dist_file.quotechar);
             }
         }
         //std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;

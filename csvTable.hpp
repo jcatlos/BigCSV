@@ -12,7 +12,6 @@
 #include "RowComparator.hpp"
 
 #ifndef BIG_CSV_CSVTABLE_HPP
-
 #define BIG_CSV_CSVTABLE_HPP
 
 namespace bigCSV{

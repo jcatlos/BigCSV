@@ -33,14 +33,10 @@ namespace bigCSV {
         //close_input_stream();
     }
 
-    void csvFile::open_input_stream(bool skip_header) {
+    void csvFile::open_input_stream() {
         input_stream.close();                                           // Close the file if it is opened
         input_stream.open(file.get_path(), std::ifstream::in);
         initialize();
-        if(skip_header){                                                // Removing the heading line
-            std::string s;
-            //std::getline(input_stream, s, in_endline);
-        }
     }
 
     void csvFile::close_input_stream() {
@@ -118,7 +114,7 @@ namespace bigCSV {
     }
 
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition, char out_delimiter, char out_quotechar, char out_endline) {
-        open_input_stream(true);
+        open_input_stream();
         // Printing the first row
         std::vector<std::string> line_tokens;
 
@@ -152,7 +148,7 @@ namespace bigCSV {
     void csvFile::trivialSort(std::ostream& out, const RowComparator& comp){
         // Add all lines of a file in a vector
         std::vector<TableRow> lines;
-        open_input_stream(true);
+        open_input_stream();
         while(not_eof()){
             lines.push_back(getNextTableRow());
         }
@@ -173,7 +169,7 @@ namespace bigCSV {
 
     std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)>& condition) {
         std::cout<<"calling distribute function"<<std::endl;
-        open_input_stream(true);
+        open_input_stream();
         std::vector<csvFile> out;
         std::string header = formatRow(schema, delimiter, quotechar, endline);
         while(not_eof()){
@@ -183,8 +179,7 @@ namespace bigCSV {
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
-            //std::cout<<header;
-            std::uintmax_t file_size = 0;
+            std::uintmax_t file_size = header.size();
             // Fill it while the main file is not empty or the output file is not full
             while(not_eof() && file_size < 13500){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto line = getNextLine();
@@ -192,7 +187,6 @@ namespace bigCSV {
                 auto row = formatRow(line, delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
-                //std::cout<<row;
             }
             // Close the file and add it to the output
             out_file.close();
