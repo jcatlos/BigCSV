@@ -11,6 +11,27 @@
 
 namespace bigCSV {
 
+     bool Shell::parse_where_clause(int& index, csvTable& table, std::function<bool(const std::vector<std::string>&)>& condition){
+        if(index < command.size() && command[index] == "WHERE") {
+            index++;
+            auto pair = split(command[index], '=');
+            if (pair.size() != 2) {
+                std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
+                return false;
+            }
+            int col_index = index_of(pair[0], table.schema);
+            if (col_index < 0) {
+                std::cout<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                return false;
+            }
+            std::cout<<"value = '"<<pair[1]<<"' at "<<col_index<<std::endl;
+            condition = create_equal_check(col_index, pair[1]);
+            index++;
+        }
+
+        return true;
+    }
+
     bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, char>& attributes){
         auto result = split(pair, '=');
         // Invalid form of attribute setting
@@ -37,8 +58,9 @@ namespace bigCSV {
         else{
             return std::map<std::string, char>();
         }
-
     }
+
+
 
     bool Shell::modify_attribute_map(int& index, std::map<std::string, char>& atts){
         // If there are attributes to be parsed, parse them
@@ -161,35 +183,20 @@ namespace bigCSV {
         }
 
         // Check for WHERE clause
-        if(index < command.size() && command[index] == "WHERE") {
-            index++;
-            auto pair = split(command[index], '=');
-            if (pair.size() != 2) {
-                std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
-                return;
-            }
-            int col_index = index_of(pair[0], table.schema);
-            if (col_index < 0) {
-                std::cout<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
-                return;
-            }
-            std::cout<<"value = '"<<pair[1]<<"'"<<std::endl;
-            condition = create_equal_check(col_index, pair[1]);
-            index++;
-        }
+        if(!parse_where_clause(index, table, condition)) return;
 
         table.updateTable(condition, update);
 
     }
 
     void Shell::select() {
-        std::cout<<"SELECT"<<std::endl;
-        bool sort = false;
-        bool to_file = false;
-        std::vector<std::string> selected_columns;
-        RowComparator comparator((std::vector<std::string>()));
-        std::function<bool(const std::vector<std::string>&)> condition = tautology;
+        //std::cout<<"SELECT"<<std::endl;
+        bool sort = false;                                                              // If the output has to be sorted
+        bool to_file = false;                                                           // If the output is directed into a file (otherwise goes to std::cout)
         std::ofstream file_stream;
+        std::vector<std::string> selected_columns;                                      // Columns to be printed
+        RowComparator comparator((std::vector<std::string>()));                      // Comparator to be used for sorting (default is an implicit one)
+        std::function<bool(const std::vector<std::string>&)> condition = tautology;     // The condition for filtering of the results (default is "none")
 
         // Add all provided column names into selected_columns
         int index = 1;                                          // Current position in the command;
@@ -198,7 +205,7 @@ namespace bigCSV {
                 std::cout<<"Missing FROM clause"<< std::endl;
                 return;
             }
-            std::cout<<command[index]<<std::endl;
+            //std::cout<<command[index]<<std::endl;
             selected_columns.push_back(command[index]);
         }
         index++;                                            // Skip the "FROM" token
@@ -212,27 +219,13 @@ namespace bigCSV {
         bigCSV::csvTable& table = tables[command[index]];
         index++;
 
-        std::cout<<"Table found"<<std::endl;
+        //std::cout<<"Table found"<<std::endl;
 
         // Now the voluntary parts
 
         // Check for WHERE clause
-        if(index < command.size() && command[index] == "WHERE") {
-            index++;
-            auto pair = split(command[index], '=');
-            if (pair.size() != 2) {
-                std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
-                return;
-            }
-            int col_index = index_of(pair[0], table.schema);
-            if (col_index < 0) {
-                std::cout << "ERROR " << pair[0] << " not in column" << std::endl;
-                return;
-            }
-            std::cout<<"value = '"<<pair[1]<<"'"<<std::endl;
-            condition = create_equal_check(col_index, pair[1]);
-            index++;
-        }
+        if(!parse_where_clause(index, table, condition)) return;
+
         // Check for ORDER BY clause
         if(index < command.size() && command[index] == "ORDER"){
             index++;
@@ -262,11 +255,9 @@ namespace bigCSV {
         std::cout<<"Launching Query"<<std::endl;
 
         std::ostream& out = (to_file ? file_stream : std::cout);
-        if(sort){
-            table.sort(out, comparator, condition, selected_columns);
-        }
-        else table.printColumns(out, selected_columns, condition);
 
+        if(sort) table.sort(out, comparator, condition, selected_columns);
+        else table.printColumns(out, selected_columns, condition);
     }
 
     void Shell::insert(){

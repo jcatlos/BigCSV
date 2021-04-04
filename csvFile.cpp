@@ -22,6 +22,7 @@ namespace bigCSV {
         : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream()
     {}
 
+    // Opens the input file at the beginning to be read from
     void csvFile::open_input_stream() {
         input_stream.close();                                           // Close the file if it is opened
         input_stream.open(file.get_path(), std::ifstream::in);
@@ -33,14 +34,18 @@ namespace bigCSV {
         }
     }
 
+    // Closes the input_file
     void csvFile::close_input_stream() {
         input_stream.close();
     }
 
+    // Retrieve the path of the input file
     std::filesystem::path csvFile::get_path() const {
         return file.get_path();
     }
 
+    // Get the next line as a vector of strings
+        // Eats all the leading and trailing whitespace
     std::vector<std::string> csvFile::getNextLine() {
         std::vector<std::string> out = std::vector<std::string>();
 
@@ -56,6 +61,7 @@ namespace bigCSV {
         std::string token = "";
         while (line_it != line.end()) {
             char c = *line_it;
+
             // Parse quoted strings
             if (c == quotechar) {
                 token = "";
@@ -124,17 +130,16 @@ namespace bigCSV {
         // Printing columns
         std::vector<std::string> out_tokens;
         while(not_eof()){
-            // Construct the line
             line_tokens = getNextLine();
+            if(!condition(line_tokens)) continue;                               // If the line does not pas the condition, skip it
+            // Construct the line for output
             out_tokens.clear();
             for(auto&& index : line_mask){
                 if(line_tokens.size() <= index) out_tokens.push_back("");       // If index is too high, skip it
                 else out_tokens.push_back(line_tokens[index]);
             }
-            // Print if it satisfies the condition
-            if(condition(out_tokens)){
-                out<<formatRow(out_tokens, out_delimiter, out_quotechar, out_endline);
-            }
+            // Append it to the output
+            out<<formatRow(out_tokens, out_delimiter, out_quotechar, out_endline);
         }
         close_input_stream();
     }

@@ -7,6 +7,7 @@
 namespace bigCSV{
 
     bool equals(const std::vector<std::string>& col, int index, std::string str){
+        if(index >= col.size()) return false;
         return col[index]==str;
     }
 

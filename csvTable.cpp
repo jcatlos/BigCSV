@@ -28,6 +28,7 @@ namespace bigCSV{
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
         // Print out the header for the output
         out<<formatRow(input_columns, out_delimiter, out_quotechar, out_endline);
+        std::cout<<"Input files size = "<<input_files.size()<<std::endl;
         for(auto&& file: input_files){
             // Call printColumns for all files in the table
             file.second.printColumns(out, input_columns, condition, out_delimiter, out_quotechar, out_endline);
@@ -124,9 +125,11 @@ namespace bigCSV{
             std::swap(output_v, input_v);
         }
 
-        out<<"Merged"<<std::endl;
+        std::cout<<"Merged"<<std::endl;
 
         // There is only one file in the input_v - means everythng is sorted
+            // Firstly, header has to be added
+        out<<formatRow(columns, out_delimiter, out_quotechar, out_endline);
         (*input_v)[0].printColumns(out,columns,tautology, out_delimiter, out_quotechar, out_endline);
     }
 

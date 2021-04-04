@@ -15,7 +15,7 @@ namespace bigCSV{
     private:
         std::vector<std::string> order;
     public:
-        RowComparator(std::vector<std::string> o) : order(std::move(o)) {}
+        explicit RowComparator(std::vector<std::string>&& o) : order(std::move(o)) {}
         bool operator()(const TableRow& first_row, const TableRow& second_row) const;
     };
 }

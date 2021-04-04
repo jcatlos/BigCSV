@@ -30,6 +30,9 @@ namespace bigCSV {
         void update();
 
         std::string getNextWord(std::string& line, std::string::iterator& it);
+
+        bool parse_where_clause(int &index, csvTable &table,
+                           std::function<bool(const std::vector<std::string> &)> &condition);
     };
 }
 
