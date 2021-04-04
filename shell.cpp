@@ -14,19 +14,23 @@ namespace bigCSV {
      bool Shell::parse_where_clause(int& index, csvTable& table, std::function<bool(const std::vector<std::string>&)>& condition){
         if(index < command.size() && command[index] == "WHERE") {
             index++;
-            auto pair = split(command[index], '=');
+            std::string first = command[index++];
+            if(command[index] != "=") return true;
+            index++;
+            std::string second = command[index++];
+            /*auto pair = split(command[index], '=');
             if (pair.size() != 2) {
                 std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
                 return false;
-            }
-            int col_index = index_of(pair[0], table.schema);
+            }*/
+            int col_index = index_of(first, table.schema);
             if (col_index < 0) {
-                std::cout<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                std::cout<<"ERROR: Column '"<<first<<"' is not in table '"<<command[1]<<"'"<<std::endl;
                 return false;
             }
-            std::cout<<"value = '"<<pair[1]<<"' at "<<col_index<<std::endl;
-            condition = create_equal_check(col_index, pair[1]);
-            index++;
+            std::cout<<"value = '"<<second<<"' at "<<col_index<<std::endl;
+            condition = create_equal_check(col_index, second);
+            //index++;
         }
 
         return true;

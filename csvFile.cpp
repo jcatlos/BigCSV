@@ -86,7 +86,7 @@ namespace bigCSV {
             }
         }
 
-        // The line must not end with a in_delimiter, so the last token must be added into the output
+        // The line must not end with a in_delimiter, so the last was never added to the line
         out.push_back(token);
 
         return out;
@@ -168,7 +168,7 @@ namespace bigCSV {
     }
 
     std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)>& condition){
-        std::cout<<"calling distribute function"<<std::endl;
+        //std::cout<<"calling distribute function"<<std::endl;
         std::vector<csvFile> out;
         std::string header = formatRow(schema, delimiter, quotechar, endline);
 
