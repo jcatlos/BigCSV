@@ -115,13 +115,13 @@ namespace bigCSV{
         std::set<std::string> present;
 
         // Insert all of the columns of the first schema
-        for(auto&& col : first){
+        for(const auto& col : first){
             out.push_back(col);
             present.insert(col);
         }
 
         // Insert all columns from the second schema that were no already inserted
-        for(auto&& col : second){
+        for(const auto& col : second){
             if(present.find(col) == present.end()){
                 out.push_back(col);
             }

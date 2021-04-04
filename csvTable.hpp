@@ -44,6 +44,8 @@ namespace bigCSV{
 
         void addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
 
+        void updateTable(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update);
+
         csvFile merge2(csvFile &first, csvFile &second, const RowComparator &comp) const;
     };
 }

@@ -169,6 +169,33 @@ Conditions.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\catlos.dir\build.make CMakeFiles/catlos.dir/Conditions.cpp.s
 .PHONY : Conditions.cpp.s
 
+RowChange.obj: RowChange.cpp.obj
+
+.PHONY : RowChange.obj
+
+# target to build an object file
+RowChange.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\catlos.dir\build.make CMakeFiles/catlos.dir/RowChange.cpp.obj
+.PHONY : RowChange.cpp.obj
+
+RowChange.i: RowChange.cpp.i
+
+.PHONY : RowChange.i
+
+# target to preprocess a source file
+RowChange.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\catlos.dir\build.make CMakeFiles/catlos.dir/RowChange.cpp.i
+.PHONY : RowChange.cpp.i
+
+RowChange.s: RowChange.cpp.s
+
+.PHONY : RowChange.s
+
+# target to generate assembly for a file
+RowChange.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\catlos.dir\build.make CMakeFiles/catlos.dir/RowChange.cpp.s
+.PHONY : RowChange.cpp.s
+
 RowComparator.obj: RowComparator.cpp.obj
 
 .PHONY : RowComparator.obj
@@ -424,6 +451,9 @@ help:
 	@echo ... Conditions.obj
 	@echo ... Conditions.i
 	@echo ... Conditions.s
+	@echo ... RowChange.obj
+	@echo ... RowChange.i
+	@echo ... RowChange.s
 	@echo ... RowComparator.obj
 	@echo ... RowComparator.i
 	@echo ... RowComparator.s

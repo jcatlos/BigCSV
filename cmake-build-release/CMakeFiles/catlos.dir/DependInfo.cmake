@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "C:/Users/jakub/Documents/GitHub/catlos/Conditions.cpp" "C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/catlos.dir/Conditions.cpp.obj"
+  "C:/Users/jakub/Documents/GitHub/catlos/RowChange.cpp" "C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/catlos.dir/RowChange.cpp.obj"
   "C:/Users/jakub/Documents/GitHub/catlos/RowComparator.cpp" "C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/catlos.dir/RowComparator.cpp.obj"
   "C:/Users/jakub/Documents/GitHub/catlos/TableRow.cpp" "C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/catlos.dir/TableRow.cpp.obj"
   "C:/Users/jakub/Documents/GitHub/catlos/csvFile.cpp" "C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/catlos.dir/csvFile.cpp.obj"

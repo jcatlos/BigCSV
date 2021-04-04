@@ -88,6 +88,12 @@
 		<Unit filename="C:/Users/jakub/Documents/GitHub/catlos/Conditions.hpp">
 			<Option target="catlos"/>
 		</Unit>
+		<Unit filename="C:/Users/jakub/Documents/GitHub/catlos/RowChange.cpp">
+			<Option target="catlos"/>
+		</Unit>
+		<Unit filename="C:/Users/jakub/Documents/GitHub/catlos/RowChange.hpp">
+			<Option target="catlos"/>
+		</Unit>
 		<Unit filename="C:/Users/jakub/Documents/GitHub/catlos/RowComparator.cpp">
 			<Option target="catlos"/>
 		</Unit>

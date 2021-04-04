@@ -126,4 +126,15 @@ namespace bigCSV{
         (*input_v)[0].printColumns(out,columns,tautology, out_delimiter, out_quotechar, out_endline);
     }
 
+    void csvTable::updateTable(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update) {
+        std::map<std::filesystem::path, csvFile> new_files;
+        for(auto&& file: input_files){
+            csvFile new_file = file.second.createUpdatedFile(condition, update);
+            new_file.init_file();
+            std::filesystem::path file_path = new_file.file.get_path();
+            new_files.emplace(std::make_pair(file_path, std::move(new_file)));
+        }
+        input_files = std::move(new_files);
+    }
+
 }

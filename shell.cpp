@@ -7,6 +7,7 @@
 #include "csvFile.hpp"
 #include "shell.hpp"
 #include "Conditions.hpp"
+#include "RowUpdate.hpp"
 
 namespace bigCSV {
 
@@ -50,7 +51,7 @@ namespace bigCSV {
         auto it = line.begin();
         while(it != line.end()){
             word = "";
-            while(word.size() == 0){
+            while(word.empty()){
                 word = getNextWord(line, it);
             }
             command.push_back(word);
@@ -79,14 +80,73 @@ namespace bigCSV {
         );
     }
 
+    void Shell::update() {
+        BigCSV::RowUpdate update;
+        std::function<bool(const std::vector<std::string>&)> condition = tautology;
+
+        // Check the minimal command length and form
+        if(command.size() < 4 || command[2] != "SET"){
+            std::cout<<"ERROR: Invalid UPDATE command form";
+            return;
+        }
+
+        // Find the specified table
+        auto table_it = tables.find(command[1]);
+        if(table_it == tables.end()){
+            std::cout<<"ERROR: Table "<<command[1]<<" Not found" << std::endl;
+            return;
+        }
+        bigCSV::csvTable& table = tables[command[1]];
+
+        // Extract all updates
+        int index = 3;
+        while(index < command.size() && command[index] != "WHERE"){
+            auto pair = split(command[index], '=');
+            if(pair.size() != 2){
+                std::cout<<"ERROR: Invalid update '"<<command[index]<<"'"<<std::endl;
+                return;
+            }
+            int col_index = index_of(pair[0], table.schema);
+            if(col_index == -1) {
+                std::cout<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                return;
+            }
+            update.addChange(col_index, BigCSV::RowUpdate::ChangeTo(pair[1]));
+            index++;
+        }
+
+        // Check for WHERE clause
+        if(index < command.size() && command[index] == "WHERE") {
+            index++;
+            auto pair = split(command[index], '=');
+            if (pair.size() != 2) {
+                std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
+                return;
+            }
+            int col_index = index_of(pair[0], table.schema);
+            if (col_index < 0) {
+                std::cout<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                return;
+            }
+            std::cout<<"value = '"<<pair[1]<<"'"<<std::endl;
+            condition = create_equal_check(col_index, pair[1]);
+            index++;
+        }
+
+        table.updateTable(condition, update);
+
+    }
+
     void Shell::select() {
         std::cout<<"SELECT"<<std::endl;
         bool sort = false;
         bool to_file = false;
-        RowComparator comparator((std::vector<std::string>()));
         std::vector<std::string> selected_columns;
+        RowComparator comparator((std::vector<std::string>()));
+        std::function<bool(const std::vector<std::string>&)> condition = tautology;
         std::ofstream file_stream;
 
+        // Add all provided column names into selected_columns
         int index = 1;                                          // Current position in the command;
         for(;command[index] != "FROM"; index++){
             if(index == command.size()){
@@ -98,10 +158,9 @@ namespace bigCSV {
         }
         index++;                                            // Skip the "FROM" token
 
-        std::cout<<"Columns parsed"<<std::endl;
-
         // Find the specified table
-        if(tables.find(command[index]) == tables.end()){
+        auto table_it = tables.find(command[index]);
+        if(table_it == tables.end()){
             std::cout<<"ERROR Table "<<command[index]<<" Not found" << std::endl;
             return;
         }
@@ -110,10 +169,7 @@ namespace bigCSV {
 
         std::cout<<"Table found"<<std::endl;
 
-        std::function<bool(const std::vector<std::string>&)> condition = tautology;
-
         // Now the voluntary parts
-        // WHERE - Now only 1 condition
 
         // Check for WHERE clause
         if(index < command.size() && command[index] == "WHERE") {
@@ -199,10 +255,6 @@ namespace bigCSV {
 
         tables[table_name].addStream(path, file_attributes["DELIMITER"], file_attributes["ENDLINE"], file_attributes["QUOTECHAR"]);
 
-    }
-
-    void Shell::update(){
-        std::cout<<"UPDATE"<<std::endl;
     }
 
     void Shell::alter(){

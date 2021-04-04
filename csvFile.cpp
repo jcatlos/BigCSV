@@ -23,14 +23,10 @@ namespace bigCSV {
     {}
 
     void csvFile::initialize() {
-        //open_input_stream(false);
-        schema = getNextLine();
-        column_count = schema.size();
+        this->schema = getNextLine();
         for(int i = 0; i < schema.size(); i++){
             columns[trimmedString(schema[i])] = i;
         }
-        //std::cout<<"Initialized with header "<<formatRow(schema, in_delimiter,in_quotechar,in_endline)<<std::endl;
-        //close_input_stream();
     }
 
     void csvFile::open_input_stream() {
@@ -51,8 +47,6 @@ namespace bigCSV {
         std::getline(input_stream, line, endline);
 
         if(line.length() == 0) return out;
-
-        //std::cout<<"line = "<<line<<std::endl;
 
         // Eat all of the whitespace before the first token
         std::string::const_iterator line_it = line.begin();
@@ -99,7 +93,6 @@ namespace bigCSV {
             out.map[schema[i]] = line[i];
             out.schema.push_back(schema[i]);
             out.values.push_back(line[i]);
-
         }
 
         return out;
@@ -115,28 +108,29 @@ namespace bigCSV {
 
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition, char out_delimiter, char out_quotechar, char out_endline) {
         open_input_stream();
-        // Printing the first row
         std::vector<std::string> line_tokens;
 
-        // Not needed, pinted in table
-        //std::cout<<formatRow(input_columns, in_delimiter, in_quotechar, in_endline);
-
+        // Mask construction
+            // Mask = vector of indexes of columns to be printed
+            // If a column name is not found in the columns of the file, MAXINT is set and skipped in selection
         std::vector<int> line_mask;
         for(const auto& column : input_columns){
             auto trimmed_col = trimmedString(column);
-            //std::cout<<"working with column '"<<column<<"' Changed to '"<<trimmed_col<<"'"<<std::endl;
             if(columns.find(trimmed_col) == columns.end()) line_mask.push_back(INT32_MAX);
             else line_mask.push_back(columns[trimmed_col]);
         }
 
+        // Printing columns
         std::vector<std::string> out_tokens;
         while(not_eof()){
+            // Construct the line
             line_tokens = getNextLine();
             out_tokens.clear();
             for(auto&& index : line_mask){
-                if(line_tokens.size() <= index) out_tokens.push_back("");
+                if(line_tokens.size() <= index) out_tokens.push_back("");       // If index is too high, skip it
                 else out_tokens.push_back(line_tokens[index]);
             }
+            // Print if it satisfies the condition
             if(condition(out_tokens)){
                 out<<formatRow(out_tokens, out_delimiter, out_quotechar, out_endline);
             }
@@ -167,11 +161,12 @@ namespace bigCSV {
         }
     }
 
-    std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)>& condition) {
+    std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)>& condition){
         std::cout<<"calling distribute function"<<std::endl;
-        open_input_stream();
         std::vector<csvFile> out;
         std::string header = formatRow(schema, delimiter, quotechar, endline);
+
+        open_input_stream();
         while(not_eof()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
@@ -197,5 +192,25 @@ namespace bigCSV {
         std::cout<<"Distribute finished"<<std::endl;
 
         return out;
+    }
+
+    csvFile csvFile::createUpdatedFile(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update) {
+        std::string header = formatRow(schema, delimiter, quotechar, endline);
+        auto tmp_file = tmpFileFactory::get_tmpFile();
+        std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
+        out_file<<header;
+        std::vector<std::string> line;
+
+        open_input_stream();
+        while(not_eof()){
+            line = getNextLine();
+            if(condition(line)){
+                line = update.apply(line);
+            }
+            out_file<<formatRow(line, delimiter, quotechar, endline);
+        }
+        close_input_stream();
+
+        return csvFile(std::move(tmp_file), delimiter, endline, quotechar);
     }
 }

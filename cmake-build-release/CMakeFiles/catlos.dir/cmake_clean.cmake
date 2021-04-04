@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/catlos.dir/Conditions.cpp.obj"
+  "CMakeFiles/catlos.dir/RowChange.cpp.obj"
   "CMakeFiles/catlos.dir/RowComparator.cpp.obj"
   "CMakeFiles/catlos.dir/TableRow.cpp.obj"
   "CMakeFiles/catlos.dir/csvFile.cpp.obj"
