@@ -26,13 +26,11 @@ namespace bigCSV {
         void select();
         void insert();
         void alter();
-
         void update();
 
         std::string getNextWord(std::string& line, std::string::iterator& it);
 
-        bool parse_where_clause(int &index, csvTable &table,
-                           std::function<bool(const std::vector<std::string> &)> &condition);
+        bool parse_where_clause(int &index, csvTable &table, Conditions &conditions);
     };
 }
 

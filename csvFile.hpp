@@ -13,6 +13,7 @@
 #include "TableRow.hpp"
 #include "RowComparator.hpp"
 #include "RowUpdate.hpp"
+#include "Conditions.hpp"
 
 #ifndef BIG_CSV_CSVFILE_HPP
 #define BIG_CSV_CSVFILE_HPP
@@ -52,14 +53,14 @@ namespace bigCSV {
         std::vector<std::string> getNextLine() ;
         TableRow getNextTableRow() ;
 
-        csvFile createUpdatedFile(const std::function<bool(const std::vector<std::string>&)>& condition, BigCSV::RowUpdate& update) ;
+        csvFile createUpdatedFile(const Conditions& conditions, BigCSV::RowUpdate& update) ;
 
-        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition, char out_delimiter, char out_quotechar, char out_endline);
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const Conditions& conditions, char out_delimiter, char out_quotechar, char out_endline);
         void printColumns(std::ostream& out, const std::vector<std::string>& input_columns);
         void printColumns(std::ostream& out);
 
         void trivialSort(std::ostream& out, const RowComparator& comp);
-        std::vector<csvFile> distribute(const std::function<bool(const std::vector<std::string>&)>& condition);
+        std::vector<csvFile> distribute(const Conditions& condition);
 
         void open_input_stream() ;
         void close_input_stream() ;

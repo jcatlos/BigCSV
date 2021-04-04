@@ -110,10 +110,11 @@ namespace bigCSV {
     }
 
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns) {
-        printColumns(out, input_columns, tautology, delimiter, quotechar, endline);
+        Conditions conds;
+        printColumns(out, input_columns, conds, delimiter, quotechar, endline);
     }
 
-    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition, char out_delimiter, char out_quotechar, char out_endline) {
+    void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const Conditions& conditions, char out_delimiter, char out_quotechar, char out_endline) {
         open_input_stream();
         std::vector<std::string> line_tokens;
 
@@ -131,7 +132,7 @@ namespace bigCSV {
         std::vector<std::string> out_tokens;
         while(not_eof()){
             line_tokens = getNextLine();
-            if(!condition(line_tokens)) continue;                               // If the line does not pas the condition, skip it
+            if(!conditions.Hold(line_tokens)) continue;                               // If the line does not pas the condition, skip it
             // Construct the line for output
             out_tokens.clear();
             for(auto&& index : line_mask){
@@ -167,7 +168,7 @@ namespace bigCSV {
         }
     }
 
-    std::vector<csvFile> csvFile::distribute(const std::function<bool(const std::vector<std::string>&)>& condition){
+    std::vector<csvFile> csvFile::distribute(const Conditions& conditions){
         //std::cout<<"calling distribute function"<<std::endl;
         std::vector<csvFile> out;
         std::string header = formatRow(schema, delimiter, quotechar, endline);
@@ -184,7 +185,7 @@ namespace bigCSV {
             // Fill it while the main file is not empty or the output file is not full
             while(not_eof() && file_size < 13500){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto line = getNextLine();
-                if(!condition(line)) continue;
+                if(!conditions.Hold(line)) continue;
                 auto row = formatRow(line, delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
@@ -200,7 +201,7 @@ namespace bigCSV {
         return out;
     }
 
-    csvFile csvFile::createUpdatedFile(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update) {
+    csvFile csvFile::createUpdatedFile(const Conditions &conditions, BigCSV::RowUpdate &update) {
         std::string header = formatRow(schema, delimiter, quotechar, endline);
         auto tmp_file = tmpFileFactory::get_tmpFile();
         std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
@@ -210,7 +211,7 @@ namespace bigCSV {
         open_input_stream();
         while(not_eof()){
             line = getNextLine();
-            if(condition(line)){
+            if(conditions.Hold(line)){
                 line = update.apply(line);
             }
             out_file<<formatRow(line, delimiter, quotechar, endline);

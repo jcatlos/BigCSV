@@ -25,13 +25,13 @@ namespace bigCSV{
 
     // From each file in the table selects all columns from input_columns from rows that satisfy the 'condition' into the 'out' ostream
         // Table's out characters are used for the printing
-    void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
+    void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const Conditions& conditions){
         // Print out the header for the output
         out<<formatRow(input_columns, out_delimiter, out_quotechar, out_endline);
         std::cout<<"Input files size = "<<input_files.size()<<std::endl;
         for(auto&& file: input_files){
             // Call printColumns for all files in the table
-            file.second.printColumns(out, input_columns, condition, out_delimiter, out_quotechar, out_endline);
+            file.second.printColumns(out, input_columns, conditions, out_delimiter, out_quotechar, out_endline);
         }
     }
 
@@ -79,7 +79,8 @@ namespace bigCSV{
 
     // Shorter overload for the sort function
     void csvTable::sort(std::ostream& out, const RowComparator &comp) {
-        sort(out, comp, tautology, schema);
+        Conditions conds;
+        sort(out, comp, conds, schema);
     }
 
     // MergeSort on all files in input_files
@@ -87,14 +88,14 @@ namespace bigCSV{
         // Compares rows based on provided RowComparator
         // Filters the rows based on provided condition
         // Selects only the provided columns
-    void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)>& condition, const std::vector<std::string>& columns) {
+    void csvTable::sort(std::ostream& out, const RowComparator &comp, const Conditions& conditions, const std::vector<std::string>& columns) {
         // Using 2 vectors of files - In each iteration, files from one are merged and placed into second
         std::vector<csvFile> files1;
         std::vector<csvFile> files2;
 
         // Firstly, divide the input files into small enough fiels to be sorted in-memory and sort them
         for(auto&& file : input_files){
-            auto dist_files = file.second.distribute(condition);
+            auto dist_files = file.second.distribute(conditions);
             for(auto&& dist_file : dist_files){
                 auto tmp_file = tmpFileFactory::get_tmpFile();
                 std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
@@ -130,15 +131,16 @@ namespace bigCSV{
         // There is only one file in the input_v - means everythng is sorted
             // Firstly, header has to be added
         out<<formatRow(columns, out_delimiter, out_quotechar, out_endline);
-        (*input_v)[0].printColumns(out,columns,tautology, out_delimiter, out_quotechar, out_endline);
+        Conditions conds;         // Empty list of conditions
+        (*input_v)[0].printColumns(out,columns, conds, out_delimiter, out_quotechar, out_endline);
     }
 
     // Each file in the table is updated by the RowUpdate if it satisfies the condition
         // Temporary copies of files are created to prevent actual file modification
-    void csvTable::updateTable(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update) {
+    void csvTable::updateTable(const Conditions &conditions, BigCSV::RowUpdate &update) {
         std::map<std::filesystem::path, csvFile> new_files;
         for(auto&& file: input_files){
-            csvFile new_file = file.second.createUpdatedFile(condition, update);
+            csvFile new_file = file.second.createUpdatedFile(conditions, update);
             new_file.init_file();
             std::filesystem::path file_path = new_file.get_path();
             new_files.emplace(std::make_pair(file_path, std::move(new_file)));

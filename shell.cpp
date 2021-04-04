@@ -11,29 +11,38 @@
 
 namespace bigCSV {
 
-     bool Shell::parse_where_clause(int& index, csvTable& table, std::function<bool(const std::vector<std::string>&)>& condition){
-        if(index < command.size() && command[index] == "WHERE") {
-            index++;
-            std::string first = command[index++];
-            if(command[index] != "=") return true;
-            index++;
-            std::string second = command[index++];
-            /*auto pair = split(command[index], '=');
-            if (pair.size() != 2) {
-                std::cout << "ERROR Malformed condition: " << command[index] << std::endl;
-                return false;
-            }*/
-            int col_index = index_of(first, table.schema);
-            if (col_index < 0) {
-                std::cout<<"ERROR: Column '"<<first<<"' is not in table '"<<command[1]<<"'"<<std::endl;
-                return false;
-            }
-            std::cout<<"value = '"<<second<<"' at "<<col_index<<std::endl;
-            condition = create_equal_check(col_index, second);
-            //index++;
-        }
+     bool Shell::parse_where_clause(int& index, csvTable& table, Conditions& conds){
+         if(index < command.size() && command[index] == "WHERE") {
+             index++;
+             while(index <= command.size()-3){
+                 std::string first = command[index++];
+                 std::string operand = command[index++];
+                 if(operand != "=" && operand != "<" && operand != ">") return true;
+                 std::string second = command[index++];
 
-        return true;
+                 int col_index = index_of(first, table.schema);
+                 if (col_index < 0) {
+                     std::cout<<"ERROR: Column '"<<first<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                     return false;
+                 }
+                 //std::cout<<"value = '"<<second<<"' at "<<col_index<<std::endl;
+                 switch(operand[0]){
+                     case '=':
+                         conds.AddEquals(col_index, second);
+                         break;
+                     case '<':
+                         conds.AddIntLt(col_index, second);
+                         break;
+                     case '>':
+                         conds.AddIntGt(col_index, second);
+                         break;
+                     default:
+                         std::cout<<"ERROR: Unknown Condition '"<<operand<<"'"<<std::endl;
+                         break;
+                 }
+             }
+         }
+         return true;
     }
 
     bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, char>& attributes){
@@ -153,7 +162,7 @@ namespace bigCSV {
 
     void Shell::update() {
         BigCSV::RowUpdate update;
-        std::function<bool(const std::vector<std::string>&)> condition = tautology;
+        Conditions conds;
 
         // Check the minimal command length and form
         if(command.size() < 4 || command[2] != "SET"){
@@ -187,20 +196,20 @@ namespace bigCSV {
         }
 
         // Check for WHERE clause
-        if(!parse_where_clause(index, table, condition)) return;
+        if(!parse_where_clause(index, table, conds)) return;
 
-        table.updateTable(condition, update);
+        table.updateTable(conds, update);
 
     }
 
     void Shell::select() {
         //std::cout<<"SELECT"<<std::endl;
-        bool sort = false;                                                              // If the output has to be sorted
-        bool to_file = false;                                                           // If the output is directed into a file (otherwise goes to std::cout)
+        bool sort = false;                                              // If the output has to be sorted
+        bool to_file = false;                                           // If the output is directed into a file (otherwise goes to std::cout)
         std::ofstream file_stream;
-        std::vector<std::string> selected_columns;                                      // Columns to be printed
-        RowComparator comparator((std::vector<std::string>()));                      // Comparator to be used for sorting (default is an implicit one)
-        std::function<bool(const std::vector<std::string>&)> condition = tautology;     // The condition for filtering of the results (default is "none")
+        std::vector<std::string> selected_columns;                      // Columns to be printed
+        RowComparator comparator((std::vector<std::string>()));      // Comparator to be used for sorting (default is an implicit one)
+        Conditions conds;                                               // The condition for filtering of the results (default is "none")
 
         // Add all provided column names into selected_columns
         int index = 1;                                          // Current position in the command;
@@ -228,7 +237,7 @@ namespace bigCSV {
         // Now the voluntary parts
 
         // Check for WHERE clause
-        if(!parse_where_clause(index, table, condition)) return;
+        if(!parse_where_clause(index, table, conds)) return;
 
         // Check for ORDER BY clause
         if(index < command.size() && command[index] == "ORDER"){
@@ -260,8 +269,8 @@ namespace bigCSV {
 
         std::ostream& out = (to_file ? file_stream : std::cout);
 
-        if(sort) table.sort(out, comparator, condition, selected_columns);
-        else table.printColumns(out, selected_columns, condition);
+        if(sort) table.sort(out, comparator, conds, selected_columns);
+        else table.printColumns(out, selected_columns, conds);
     }
 
     void Shell::insert(){

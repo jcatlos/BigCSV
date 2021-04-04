@@ -37,14 +37,14 @@ namespace bigCSV{
         csvTable()
             : in_delimiter(','), in_quotechar('"'), in_endline('\n'), out_delimiter(','), out_quotechar('"'), out_endline('\n'){}
 
-        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition);
+        void printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const Conditions& conditions);
 
         void sort(std::ostream& out, const RowComparator& comp);
-        void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)>& condition, const std::vector<std::string>& columns);
+        void sort(std::ostream& out, const RowComparator& comp, const Conditions& conditions, const std::vector<std::string>& columns);
 
         void addFile(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
 
-        void updateTable(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update);
+        void updateTable(const Conditions &conditions, BigCSV::RowUpdate &update);
 
         csvFile merge2(csvFile &first, csvFile &second, const RowComparator &comp) const;
     };
