@@ -28,7 +28,6 @@ namespace bigCSV{
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const Conditions& conditions){
         // Print out the header for the output
         out<<formatRow(input_columns, out_delimiter, out_quotechar, out_endline);
-        std::cout<<"Input files size = "<<input_files.size()<<std::endl;
         for(auto&& file: input_files){
             // Call printColumns for all files in the table
             file.second.printColumns(out, input_columns, conditions, out_delimiter, out_quotechar, out_endline);
@@ -95,7 +94,7 @@ namespace bigCSV{
 
         // Firstly, divide the input files into small enough fiels to be sorted in-memory and sort them
         for(auto&& file : input_files){
-            auto dist_files = file.second.distribute(conditions);
+            auto dist_files = file.second.distribute(conditions, max_filesize);
             for(auto&& dist_file : dist_files){
                 auto tmp_file = tmpFileFactory::get_tmpFile();
                 std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
@@ -103,7 +102,7 @@ namespace bigCSV{
                 files1.emplace_back(std::move(tmp_file), dist_file.delimiter, dist_file.endline, dist_file.quotechar);
             }
         }
-        std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
+        std::cerr<<"Distributed into "<<files1.size()<<" files."<<std::endl;
 
 
         // "Labels" for the file vectors - swapped after each iteration
@@ -125,8 +124,6 @@ namespace bigCSV{
             }
             std::swap(output_v, input_v);
         }
-
-        std::cout<<"Merged"<<std::endl;
 
         // There is only one file in the input_v - means everythng is sorted
             // Firstly, header has to be added

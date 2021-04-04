@@ -60,7 +60,7 @@ namespace bigCSV {
         void printColumns(std::ostream& out);
 
         void trivialSort(std::ostream& out, const RowComparator& comp);
-        std::vector<csvFile> distribute(const Conditions& condition);
+        std::vector<csvFile> distribute(const Conditions& condition, std::size_t max_filesize);
 
         void open_input_stream() ;
         void close_input_stream() ;

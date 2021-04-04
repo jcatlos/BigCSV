@@ -11,6 +11,15 @@
 
 namespace bigCSV {
 
+    csvTable* Shell::get_table(const std::string& name){
+        auto table_it = tables.find(name);
+        if(table_it == tables.end()){
+            err_stream<<"ERROR: Table "<<name<<" Not found" << std::endl;
+            return nullptr;
+        }
+        return &(table_it->second);
+    }
+
      bool Shell::parse_where_clause(int& index, csvTable& table, Conditions& conds){
          if(index < command.size() && command[index] == "WHERE") {
              index++;
@@ -22,7 +31,7 @@ namespace bigCSV {
 
                  int col_index = index_of(first, table.schema);
                  if (col_index < 0) {
-                     std::cout<<"ERROR: Column '"<<first<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                     err_stream<<"ERROR: Column '"<<first<<"' is not in table '"<<command[1]<<"'"<<std::endl;
                      return false;
                  }
                  //std::cout<<"value = '"<<second<<"' at "<<col_index<<std::endl;
@@ -37,7 +46,7 @@ namespace bigCSV {
                          conds.AddIntGt(col_index, second);
                          break;
                      default:
-                         std::cout<<"ERROR: Unknown Condition '"<<operand<<"'"<<std::endl;
+                         err_stream<<"ERROR: Unknown Condition '"<<operand<<"'"<<std::endl;
                          break;
                  }
              }
@@ -45,44 +54,43 @@ namespace bigCSV {
          return true;
     }
 
-    bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, char>& attributes){
+    bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, std::string>& attributes){
         auto result = split(pair, '=');
         // Invalid form of attribute setting
         if(result.size() != 2) return false;
         auto key_it = attributes.find(result[0]);
         // Invalid attribute name
         if(key_it == attributes.end()) return false;
-        key_it->second = result[1][0];
+        key_it->second = result[1];
         return true;
     }
 
-    std::map<std::string, char> Shell::get_attribute_map(int& index){
-        std::map<std::string, char> atts;
-        atts["DELIMITER"] = ',';
-        atts["QUOTECHAR"] = '"';
-        atts["ENDLINE"] = '\n';
-        atts["OUT_DELIMITER"] = ',';
-        atts["OUT_QUOTECHAR"] = '"';
-        atts["OUT_ENDLINE"] = '\n';
+    std::map<std::string, std::string> Shell::get_attribute_map(int& index){
+        std::map<std::string, std::string> atts;
+        atts["DELIMITER"] = ",";
+        atts["QUOTECHAR"] = "\"";
+        atts["ENDLINE"] = "\n";
+        atts["OUT_DELIMITER"] = ",";
+        atts["OUT_QUOTECHAR"] = "\"";
+        atts["OUT_ENDLINE"] = "\n";
+        atts["MAX_FILESIZE"] = "13500";
 
         if(modify_attribute_map(index, atts)){
             return atts;
         }
         else{
-            return std::map<std::string, char>();
+            return std::map<std::string, std::string>();
         }
     }
 
-
-
-    bool Shell::modify_attribute_map(int& index, std::map<std::string, char>& atts){
+    bool Shell::modify_attribute_map(int& index, std::map<std::string, std::string>& atts){
         // If there are attributes to be parsed, parse them
         if(index < command.size() && command[index] == "SET"){
             int start_index = index;
             index++;
             for(;index<command.size(); index++){
                 if(!set_map_attribute(command[index], atts)){
-                    std::cout<<"Problem with attribute "<<index - start_index<<std::endl;
+                    err_stream<<"Problem with attribute "<<index - start_index<<std::endl;
                     return false;
                 }
             }
@@ -140,23 +148,23 @@ namespace bigCSV {
 
     void Shell::create(){
         if(command.size() < 3 && command[1]!="TABLE"){
-            std::cout<<"Invalid command form";
+            err_stream<<"Invalid command form";
             return;
         }
         std::string table_name = command[2];
 
         int index = 3;
-        std::map<std::string, char> table_attributes = get_attribute_map(index);
+        std::map<std::string, std::string> table_attributes = get_attribute_map(index);
 
         if(table_attributes.empty()){
-            std::cout<<"Problems occured during attribute parsing, Aborting CREATE"<<std::endl;
+            err_stream<<"Problems occured during attribute parsing, Aborting CREATE"<<std::endl;
             return;
         }
 
         tables[table_name] = bigCSV::csvTable(
-                table_attributes["DELIMITER"],
-                table_attributes["QUOTECHAR"],
-                table_attributes["ENDLINE"]
+                table_attributes["DELIMITER"][0],
+                table_attributes["QUOTECHAR"][0],
+                table_attributes["ENDLINE"][0]
         );
     }
 
@@ -166,29 +174,25 @@ namespace bigCSV {
 
         // Check the minimal command length and form
         if(command.size() < 4 || command[2] != "SET"){
-            std::cout<<"ERROR: Invalid UPDATE command form";
+            err_stream<<"ERROR: Invalid UPDATE command form";
             return;
         }
 
         // Find the specified table
-        auto table_it = tables.find(command[1]);
-        if(table_it == tables.end()){
-            std::cout<<"ERROR: Table "<<command[1]<<" Not found" << std::endl;
-            return;
-        }
-        bigCSV::csvTable& table = tables[command[1]];
+        bigCSV::csvTable* table = get_table(command[1]);
+        if(table == nullptr) return;
 
         // Extract all updates
         int index = 3;
         while(index < command.size() && command[index] != "WHERE"){
             auto pair = split(command[index], '=');
             if(pair.size() != 2){
-                std::cout<<"ERROR: Invalid update '"<<command[index]<<"'"<<std::endl;
+                err_stream<<"ERROR: Invalid update '"<<command[index]<<"'"<<std::endl;
                 return;
             }
-            int col_index = index_of(pair[0], table.schema);
+            int col_index = index_of(pair[0], table->schema);
             if(col_index == -1) {
-                std::cout<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                err_stream<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
                 return;
             }
             update.addChange(col_index, BigCSV::RowUpdate::ChangeTo(pair[1]));
@@ -196,9 +200,9 @@ namespace bigCSV {
         }
 
         // Check for WHERE clause
-        if(!parse_where_clause(index, table, conds)) return;
+        if(!parse_where_clause(index, *table, conds)) return;
 
-        table.updateTable(conds, update);
+        table->updateTable(conds, update);
 
     }
 
@@ -215,29 +219,22 @@ namespace bigCSV {
         int index = 1;                                          // Current position in the command;
         for(;command[index] != "FROM"; index++){
             if(index == command.size()){
-                std::cout<<"Missing FROM clause"<< std::endl;
+                err_stream<<"Missing FROM clause"<< std::endl;
                 return;
             }
-            //std::cout<<command[index]<<std::endl;
             selected_columns.push_back(command[index]);
         }
         index++;                                            // Skip the "FROM" token
 
         // Find the specified table
-        auto table_it = tables.find(command[index]);
-        if(table_it == tables.end()){
-            std::cout<<"ERROR Table "<<command[index]<<" Not found" << std::endl;
-            return;
-        }
-        bigCSV::csvTable& table = tables[command[index]];
+        bigCSV::csvTable* table = get_table(command[index]);
+        if(table == nullptr) return;
         index++;
-
-        //std::cout<<"Table found"<<std::endl;
 
         // Now the voluntary parts
 
         // Check for WHERE clause
-        if(!parse_where_clause(index, table, conds)) return;
+        if(!parse_where_clause(index, *table, conds)) return;
 
         // Check for ORDER BY clause
         if(index < command.size() && command[index] == "ORDER"){
@@ -246,7 +243,6 @@ namespace bigCSV {
             sort = true;
             std::vector<std::string> order_by;
             while(index<command.size() && command[index] != "INTO"){
-                std::cout<<command[index]<<std::endl;
                 order_by.push_back(command[index]);
                 index++;
             }
@@ -261,95 +257,88 @@ namespace bigCSV {
         }
 
         if(index < command.size()){
-            std::cout<<"Error: Malformed SELECT query" <<std::endl;
+            err_stream<<"Error: Malformed SELECT query" <<std::endl;
             return;
         }
 
-        std::cout<<"Launching Query"<<std::endl;
-
         std::ostream& out = (to_file ? file_stream : std::cout);
 
-        if(sort) table.sort(out, comparator, conds, selected_columns);
-        else table.printColumns(out, selected_columns, conds);
+        if(sort) table->sort(out, comparator, conds, selected_columns);
+        else table->printColumns(out, selected_columns, conds);
     }
 
     void Shell::insert(){
         // Check the form of the statement
-
-        std::cout<<"INSERT STARTED"<<std::endl;
-
         if(command.size() < 5 || command[1] != "INTO" || command[3] != "PATH" ){
-            std::cout<<"Invalid command form";
+            err_stream<<"Invalid command form";
             return;
         }
-
-        auto table_name = command[2];
-        auto path = command[4];
 
         // Find the specified table
-        auto table_it = tables.find(table_name);
-        if(table_it == tables.end()){
-            std::cout<<"Error: Table \""<<table_name<<"\" Not found"<<std::endl;
-            return;
-        }
+        bigCSV::csvTable* table = get_table(command[2]);
+        if(table == nullptr) return;
 
+        auto path = command[4];
         int index = 5;
-        std::map<std::string, char> file_attributes = get_attribute_map(index);
-        //std::cout<<"att = "<<table_attributes["QUOTECHAR"]<<std::endl;
+        std::map<std::string, std::string> file_attributes = get_attribute_map(index);
 
         if(file_attributes.empty()){
-            std::cout<<"Problems occured during attribute parsing, Aborting INSERT INTO"<<std::endl;
+            err_stream<<"Problems occured during attribute parsing, Aborting INSERT INTO"<<std::endl;
             return;
         }
 
-        tables[table_name].addFile(path, file_attributes["DELIMITER"], file_attributes["ENDLINE"],
-                                   file_attributes["QUOTECHAR"]);
+        table->addFile(path, file_attributes["DELIMITER"][0], file_attributes["ENDLINE"][0],
+                                   file_attributes["QUOTECHAR"][0]);
 
     }
 
     void Shell::alter(){
-        std::cout<<"ALTER"<<std::endl;
-
         if(command.size() < 3 || command[1] != "TABLE"){
-            std::cout<<"Invalid command form";
+            err_stream<<"Invalid command form";
             return;
         }
 
         // Find the specified table
-        std::string table_name = command[2];
-        auto table_it = tables.find(table_name);
-        if(table_it == tables.end()){
-            std::cout<<"Error: Table \""<<table_name<<"\" Not found"<<std::endl;
-            return;
-        }
-        auto& table = tables[table_name];
+        csvTable* table = get_table(command[2]);
+        if(table == nullptr) return;
 
         int index = 3;
-        std::map<std::string, char>table_attributes;
-        table_attributes["DELIMITER"] = table.in_delimiter;
-        table_attributes["QUOTECHAR"] = table.in_quotechar;
-        table_attributes["ENDLINE"] = table.in_endline;
-        table_attributes["OUT_DELIMITER"] = table.out_delimiter;
-        table_attributes["OUT_QUOTECHAR"] = table.out_quotechar;
-        table_attributes["OUT_ENDLINE"] = table.out_endline;
+        std::map<std::string, std::string>table_attributes;
+        table_attributes["DELIMITER"] = table->in_delimiter;
+        table_attributes["QUOTECHAR"] = table->in_quotechar;
+        table_attributes["ENDLINE"] = table->in_endline;
+        table_attributes["OUT_DELIMITER"] = table->out_delimiter;
+        table_attributes["OUT_QUOTECHAR"] = table->out_quotechar;
+        table_attributes["OUT_ENDLINE"] = table->out_endline;
+        table_attributes["MAX_FILESIZE"] = std::to_string(table->max_filesize);
 
         if(!modify_attribute_map(index, table_attributes)){
-            std::cout<<"Problems occured during attribute parsing, Aborting ALTER"<<std::endl;
+            err_stream<<"Problems occured during attribute parsing, Aborting ALTER"<<std::endl;
             return;
         }
 
-        table.in_delimiter = table_attributes["DELIMITER"];
-        table.in_quotechar = table_attributes["QUOTECHAR"];
-        table.in_endline = table_attributes["ENDLINE"];
-        table.out_delimiter = table_attributes["OUT_DELIMITER"];
-        table.out_quotechar = table_attributes["OUT_QUOTECHAR"];
-        table.out_endline = table_attributes["OUT_ENDLINE"];
+        try{
+            table->max_filesize = std::stoi(table_attributes["MAX_FILESIZE"]);
+            if(table->max_filesize < 1) throw std::invalid_argument("File size is less than 1");
+        }
+        catch (std::invalid_argument){
+            err_stream << "Error: MAX_FILESIZE is not a non-negative integer"<<std::endl;
+            return;
+        }
+
+        table->in_delimiter = table_attributes["DELIMITER"][0];
+        table->in_quotechar = table_attributes["QUOTECHAR"][0];
+        table->in_endline = table_attributes["ENDLINE"][0];
+        table->out_delimiter = table_attributes["OUT_DELIMITER"][0];
+        table->out_quotechar = table_attributes["OUT_QUOTECHAR"][0];
+        table->out_endline = table_attributes["OUT_ENDLINE"][0];
+
+        return;
     }
 
-    void Shell::run(std::istream& in){
-
+    void Shell::run(){
         while(true){
-            get_command(in);
+            get_command(in_stream);
             std::string word = command[0];
 
             // CREATE TABLE
@@ -366,13 +355,14 @@ namespace bigCSV {
                 update();
             }
             else if(word == "EXIT") {
+                err_stream<<"SESSION ENDED SUCCESSFULLY"<<std::endl;
                 return;
             }
             else if(word == "SELECT") {
                 select();
             }
             else {
-                std::cout<<"ERROR Unknown command: "<<line<<std::endl;
+                err_stream<<"ERROR Unknown command: "<<line<<std::endl;
             }
         }
     }

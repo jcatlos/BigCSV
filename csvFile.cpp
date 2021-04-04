@@ -168,7 +168,7 @@ namespace bigCSV {
         }
     }
 
-    std::vector<csvFile> csvFile::distribute(const Conditions& conditions){
+    std::vector<csvFile> csvFile::distribute(const Conditions& conditions, std::size_t max_filesize){
         //std::cout<<"calling distribute function"<<std::endl;
         std::vector<csvFile> out;
         std::string header = formatRow(schema, delimiter, quotechar, endline);
@@ -183,7 +183,7 @@ namespace bigCSV {
             out_file<<header;
             std::uintmax_t file_size = header.size();
             // Fill it while the main file is not empty or the output file is not full
-            while(not_eof() && file_size < 13500){      // CHANGE MAX FILE SIZE (for in-memory sort)
+            while(not_eof() && file_size < max_filesize){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto line = getNextLine();
                 if(!conditions.Hold(line)) continue;
                 auto row = formatRow(line, delimiter, quotechar, endline);

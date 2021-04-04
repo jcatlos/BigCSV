@@ -9,18 +9,21 @@
 namespace bigCSV {
     class Shell{
     public:
-        void run(std::istream& in);
+        Shell(std::istream& in, std::ostream& err) : err_stream(err), in_stream(in) {}
+        void run();
     private:
-        // Variables for the whole program
+        std::ostream& err_stream;
+        std::istream& in_stream;
+
         std::map<std::string, bigCSV::csvTable> tables;
         std::string line;
         std::vector<std::string> command;
 
         void get_command(std::istream& in);
 
-        std::map<std::string, char> get_attribute_map(int& index);
-        bool modify_attribute_map(int& index, std::map<std::string, char>& atts);
-        bool set_map_attribute(const std::string &pair, std::map<std::string, char> &attributes);
+        std::map<std::string, std::string> get_attribute_map(int& index);
+        bool modify_attribute_map(int& index, std::map<std::string, std::string>& atts);
+        bool set_map_attribute(const std::string &pair, std::map<std::string, std::string> &attributes);
 
         void create();
         void select();
@@ -31,6 +34,8 @@ namespace bigCSV {
         std::string getNextWord(std::string& line, std::string::iterator& it);
 
         bool parse_where_clause(int &index, csvTable &table, Conditions &conditions);
+
+        csvTable* get_table(const std::string &name);
     };
 }
 

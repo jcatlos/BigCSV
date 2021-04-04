@@ -16,9 +16,8 @@
 
 namespace bigCSV{
     class csvTable{
-
+    private:
         std::map<std::filesystem::path, csvFile> input_files;
-        //std::map<std::string, int> columns;
 
     public:
 
@@ -29,6 +28,8 @@ namespace bigCSV{
         char out_delimiter;
         char out_quotechar;
         char out_endline;
+
+        std::size_t max_filesize = 13500;
 
         std::vector<std::string> schema;
 

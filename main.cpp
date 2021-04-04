@@ -13,43 +13,12 @@
 
 int main() {
 
-    bigCSV::Shell shell;
-    shell.run(std::cin);
-    //std::cout<<std::filesystem::temp_directory_path()<<std::endl;
-    /*bigCSV::csvTable table;
-    table.addFile("input2.csv", ',', '\n', '"');
+    std::cout<<"BigCSV Shell"<<std::endl<<std::endl;
+    std::cout<<"Program for manipulating large .csv files"<<std::endl;
+    std::cout<<"For instructions, type in 'HELP;' or read the user documentation"<<std::endl<<std::endl;
 
-    std::vector<std::string> printed_columns;
-    printed_columns.push_back("NazevZarizeni");
-    printed_columns.push_back("Obec");
-    //printed_columns.push_back("First name");
-
-    //std::cout<<"sorting table"<<std::endl;
-    auto cond = bigCSV::create_equal_check(5, "Praha 2");
-    table.sort(std::cout, printed_columns, cond);
-
-    //table.printColumns(std::cout, printed_columns, bigCSV::tautology);
-
-    //bigCSV::csvFile file("input.csv", ',', '\n', '"');
-    //std::cout<<"PRINTING COLUMNS"<<std::endl;
-    //table.printColumns(std::cout, printed_columns);
-    //file.trivialSort(printed_columns);*/
-
-/*
-    auto files = file.distribute();
-    //std::cout<<" size: "<<files.size()<<std::endl;
-    files[2].printColumns(std::cout, printed_columns);
-
-
-
-*/
-    //auto file = bigCSV::tmpFileFactory::get_tmpFile();
-
-
-    //run(std::cin);
-
-    //std::cout<<"0 open: "<<files[0].input_stream.is_open()<<std::endl;
-
-    std::cout<<"END OF MAIN"<<std::endl;
+    bigCSV::Shell shell(std::cin, std::cerr);
+    shell.run();
+    //std::cout<<"END OF MAIN"<<std::endl;
     return 0;
 }
