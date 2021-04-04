@@ -25,16 +25,16 @@ namespace bigCSV {
         char delimiter;
         char endline;
         char quotechar;
-        void initialize() ;
 
         friend csvTable;
-    public:
 
         File file;                      // Move to private when debugged
         std::ifstream input_stream;     // Same
 
-        std::map<std::string, int> columns;
+    public:
+        std::filesystem::path get_path() const;
 
+        std::map<std::string, int> columns;
         std::vector<std::string> schema;
 
         inline void init_file() {

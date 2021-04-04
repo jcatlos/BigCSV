@@ -22,23 +22,24 @@ namespace bigCSV {
         : delimiter(delim), endline(le), quotechar(q), columns(), file(std::move(fn)), input_stream()
     {}
 
-    void csvFile::initialize() {
-        this->schema = getNextLine();
-        for(int i = 0; i < schema.size(); i++){
-            columns[trimmedString(schema[i])] = i;
-        }
-    }
-
     void csvFile::open_input_stream() {
         input_stream.close();                                           // Close the file if it is opened
         input_stream.open(file.get_path(), std::ifstream::in);
-        initialize();
+
+        // Initialize the file
+        schema = getNextLine();
+        for(int i = 0; i < schema.size(); i++){
+            columns[trimmedString(schema[i])] = i;
+        }
     }
 
     void csvFile::close_input_stream() {
         input_stream.close();
     }
 
+    std::filesystem::path csvFile::get_path() const {
+        return file.get_path();
+    }
 
     std::vector<std::string> csvFile::getNextLine() {
         std::vector<std::string> out = std::vector<std::string>();
@@ -58,7 +59,7 @@ namespace bigCSV {
             // Parse quoted strings
             if (c == quotechar) {
                 token = "";
-                token += getQuotedString(*this, line_it, line, quotechar, endline);
+                token += getQuotedString(input_stream, line_it, line, quotechar, endline);
                 while(std::isspace(*line_it) && line_it != line.end()) line_it++;
                 if(line_it == line.end()) break;
                 c = *line_it;

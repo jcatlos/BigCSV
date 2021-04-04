@@ -20,13 +20,16 @@ namespace bigCSV {
 
         std::map<std::string, char> get_attribute_map(int& index);
         bool modify_attribute_map(int& index, std::map<std::string, char>& atts);
+        bool set_map_attribute(const std::string &pair, std::map<std::string, char> &attributes);
 
         void create();
         void select();
         void insert();
         void alter();
+
         void update();
 
+        std::string getNextWord(std::string& line, std::string::iterator& it);
     };
 }
 

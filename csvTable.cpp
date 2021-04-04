@@ -131,7 +131,7 @@ namespace bigCSV{
         for(auto&& file: input_files){
             csvFile new_file = file.second.createUpdatedFile(condition, update);
             new_file.init_file();
-            std::filesystem::path file_path = new_file.file.get_path();
+            std::filesystem::path file_path = new_file.get_path();
             new_files.emplace(std::make_pair(file_path, std::move(new_file)));
         }
         input_files = std::move(new_files);

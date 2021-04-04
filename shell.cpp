@@ -11,6 +11,17 @@
 
 namespace bigCSV {
 
+    bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, char>& attributes){
+        auto result = split(pair, '=');
+        // Invalid form of attribute setting
+        if(result.size() != 2) return false;
+        auto key_it = attributes.find(result[0]);
+        // Invalid attribute name
+        if(key_it == attributes.end()) return false;
+        key_it->second = result[1][0];
+        return true;
+    }
+
     std::map<std::string, char> Shell::get_attribute_map(int& index){
         std::map<std::string, char> atts;
         atts["DELIMITER"] = ',';
@@ -35,13 +46,47 @@ namespace bigCSV {
             int start_index = index;
             index++;
             for(;index<command.size(); index++){
-                if(!bigCSV::setAttribute(command[index], atts)){
+                if(!set_map_attribute(command[index], atts)){
                     std::cout<<"Problem with attribute "<<index - start_index<<std::endl;
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    // Returns the next word in the line
+        // Treats quoted strings as single words
+        // in quoted strings, escaping via '\' is supported
+    std::string Shell::getNextWord(std::string& line, std::string::iterator& it){
+        std::string out = "";
+        while(it != line.end() && isspace(*it)) it++;        // Take all the whitespace before the next word
+        bool quoted = *it == '"';
+
+        // If the word is in quotes, look until the next quotes
+        if(quoted){
+            it++;
+            while(it != line.end() && *it != '"'){
+                // Escaping
+                if(*it == '\\'){
+                    it++;
+                    if(it == line.end()) return "";
+                }
+
+                out += *it;
+                it++;
+            }
+            it++;
+        }
+
+        // Otherwise, look for the next space
+        else{
+            while(it != line.end() && !isspace(*it)){
+                out += *it;
+                it++;
+            }
+        }
+        return out;
     }
 
     void Shell::get_command(std::istream &in) {

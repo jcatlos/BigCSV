@@ -15,7 +15,7 @@
 #include "csvFile.hpp"
 
 namespace bigCSV {
-    std::string getQuotedString(bigCSV::csvFile& File,
+    std::string getQuotedString(std::istream& in,
                                 std::string::const_iterator &line_it,
                                 std::string& line,
                                 char quotechar,
@@ -27,9 +27,7 @@ namespace bigCSV {
 
     std::vector<std::string> split(const std::string& in, const char delim);
 
-    bool setAttribute(const std::string& pair, std::map<std::string, char>& attributes);
-
-    std::string getNextWord(std::string& line, std::string::iterator& it);
+    //std::string getNextWord(std::string& line, std::string::iterator& it);
 
     std::vector<std::string> createJoinedSchema (const std::vector<std::string>& first, const std::vector<std::string>& second);
 
