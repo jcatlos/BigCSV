@@ -42,7 +42,7 @@ namespace bigCSV{
         void sort(std::ostream& out, const RowComparator& comp);
         void sort(std::ostream& out, const RowComparator& comp, const std::function<bool(const std::vector<std::string>&)>& condition, const std::vector<std::string>& columns);
 
-        void addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
+        void addFile(const std::filesystem::path& path, char delimiter, char endline, char quotechar);
 
         void updateTable(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update);
 

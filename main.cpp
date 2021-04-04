@@ -17,7 +17,7 @@ int main() {
     shell.run(std::cin);
     //std::cout<<std::filesystem::temp_directory_path()<<std::endl;
     /*bigCSV::csvTable table;
-    table.addStream("input2.csv", ',', '\n', '"');
+    table.addFile("input2.csv", ',', '\n', '"');
 
     std::vector<std::string> printed_columns;
     printed_columns.push_back("NazevZarizeni");

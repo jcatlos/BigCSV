@@ -298,7 +298,8 @@ namespace bigCSV {
             return;
         }
 
-        tables[table_name].addStream(path, file_attributes["DELIMITER"], file_attributes["ENDLINE"], file_attributes["QUOTECHAR"]);
+        tables[table_name].addFile(path, file_attributes["DELIMITER"], file_attributes["ENDLINE"],
+                                   file_attributes["QUOTECHAR"]);
 
     }
 

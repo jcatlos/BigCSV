@@ -14,38 +14,38 @@
 
 namespace bigCSV{
 
-    void csvTable::addStream(const std::filesystem::path& path, char delimiter, char endline, char quotechar) {
-        csvFile file(path, delimiter, endline, quotechar);
-        file.init_file();
-        schema = createJoinedSchema(schema, file.schema);
-        input_files.emplace(path, std::move(file));
+    // Adds a file into the table
+        // No file is modified while in the table - all changes are performed on copies of the files
+    void csvTable::addFile(const std::filesystem::path& path, char delimiter, char endline, char quotechar) {
+        csvFile file(path, delimiter, endline, quotechar);      // Create a csvFile instance
+        file.init_file();                                       // Initialize the variables
+        schema = createJoinedSchema(schema, file.schema);       // Update the schema of the table
+        input_files.emplace(path, std::move(file));             // As the csvFile has deleted copy-constructor, the file is moved into the input_files
     }
 
+    // From each file in the table selects all columns from input_columns from rows that satisfy the 'condition' into the 'out' ostream
+        // Table's out characters are used for the printing
     void csvTable::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const std::function<bool(const std::vector<std::string>&)>& condition){
+        // Print out the header for the output
         out<<formatRow(input_columns, out_delimiter, out_quotechar, out_endline);
         for(auto&& file: input_files){
+            // Call printColumns for all files in the table
             file.second.printColumns(out, input_columns, condition, out_delimiter, out_quotechar, out_endline);
         }
     }
 
+    // Given 2 sorted files, returns a sorted file containing the rows of the 2 files
     bigCSV::csvFile csvTable::merge2(csvFile& first, csvFile& second, const RowComparator& comp) const{
-
         // Open input files
         first.open_input_stream();
         second.open_input_stream();
-
-        //std::cout<<"Files opened"<<std::endl;
 
         // Initialize rows
         auto first_columns = first.getNextTableRow();
         auto second_columns = second.getNextTableRow();
 
-        //std::cout<<"Rows initialized"<<std::endl;
-
         // Create the table schema
-        //std::cout<<"Creating schema"<<std::endl;
         std::vector<std::string> schema = createJoinedSchema(first_columns.schema, second_columns.schema);
-        //std::cout<<"Joined schema = "<<formatRow(schema, in_delimiter, in_quotechar, in_endline)<<std::endl;
 
         // Open output file
         bigCSV::File out_file = tmpFileFactory::get_tmpFile();
@@ -76,56 +76,62 @@ namespace bigCSV{
         return csvFile(std::move(out_file), in_delimiter, in_endline, in_quotechar);
     }
 
+    // Shorter overload for the sort function
     void csvTable::sort(std::ostream& out, const RowComparator &comp) {
         sort(out, comp, tautology, schema);
     }
 
+    // MergeSort on all files in input_files
+        // Outputs to the out ostream
+        // Compares rows based on provided RowComparator
+        // Filters the rows based on provided condition
+        // Selects only the provided columns
     void csvTable::sort(std::ostream& out, const RowComparator &comp, const std::function<bool(const std::vector<std::string>&)>& condition, const std::vector<std::string>& columns) {
+        // Using 2 vectors of files - In each iteration, files from one are merged and placed into second
         std::vector<csvFile> files1;
         std::vector<csvFile> files2;
 
-        // Distribute input_files and save them into files1
+        // Firstly, divide the input files into small enough fiels to be sorted in-memory and sort them
         for(auto&& file : input_files){
             auto dist_files = file.second.distribute(condition);
             for(auto&& dist_file : dist_files){
                 auto tmp_file = tmpFileFactory::get_tmpFile();
                 std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
                 dist_file.trivialSort(of, comp);
-                //std::cout<<"printing trivially sorted file"<<std::endl; // Debug
-                //dist_file.printColumns(std::cout); // Debug
                 files1.emplace_back(std::move(tmp_file), dist_file.delimiter, dist_file.endline, dist_file.quotechar);
             }
         }
-        //std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
+        std::cout<<"Distributed into "<<files1.size()<<" files."<<std::endl;
 
 
-        std::cout<<"Distributed"<<std::endl;
-
-        // Merge
+        // "Labels" for the file vectors - swapped after each iteration
+            // Prevents extra copying
         auto input_v = &files1;
         auto output_v = &files2;
+
+        // Merge files from input_v to output_v until there is ony one left
         while(input_v->size() > 1){
             output_v->clear();
             for(int i=1; i<input_v->size(); i+=2){
-                //std::cout<<"Size of input_v = "<<input_v->size()<<std::endl;
+                // The last file (if the number of files is odd) is just placed to the output_v
                 if(i == input_v->size()) {
                     output_v->emplace_back(std::move((*input_v)[i - 1]));
                 }
                 else{
                     output_v->emplace_back(merge2((*input_v)[i-1],(*input_v)[i],comp));
-                    //std::cout<<"\nFILE:"<<std::endl;
-                    //output_v->front().printColumns(std::cout);
                 }
             }
-            //std::cout<<"Size of output = "<<output_v->size()<<std::endl;
             std::swap(output_v, input_v);
         }
 
         out<<"Merged"<<std::endl;
 
+        // There is only one file in the input_v - means everythng is sorted
         (*input_v)[0].printColumns(out,columns,tautology, out_delimiter, out_quotechar, out_endline);
     }
 
+    // Each file in the table is updated by the RowUpdate if it satisfies the condition
+        // Temporary copies of files are created to prevent actual file modification
     void csvTable::updateTable(const std::function<bool(const std::vector<std::string> &)> &condition, BigCSV::RowUpdate &update) {
         std::map<std::filesystem::path, csvFile> new_files;
         for(auto&& file: input_files){
