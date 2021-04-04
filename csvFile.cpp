@@ -52,7 +52,10 @@ namespace bigCSV {
         std::string line;
         std::getline(input_stream, line, endline);
 
-        if(line.length() == 0) return out;
+        /*if(line.length() == 0){
+            std::cerr<<"empty line"<<std::endl;
+            return out;
+        }*/
 
         // Eat all of the whitespace before the first token
         std::string::const_iterator line_it = line.begin();
@@ -93,15 +96,16 @@ namespace bigCSV {
     }
 
     TableRow csvFile::getNextTableRow() {
-        auto line = getNextLine();
         TableRow out;
-        for(int i=0; i<line.size(); i++){
-            out.empty = false;
-            out.map[schema[i]] = line[i];
-            out.schema.push_back(schema[i]);
-            out.values.push_back(line[i]);
+        if(not_eof()){
+            auto line = getNextLine();
+            for(int i=0; i<line.size(); i++){
+                out.empty = false;
+                out.map[schema[i]] = line[i];
+                out.schema.push_back(schema[i]);
+                out.values.push_back(line[i]);
+            }
         }
-
         return out;
     }
 
@@ -154,8 +158,7 @@ namespace bigCSV {
             lines.push_back(getNextTableRow());
         }
         close_input_stream();
-        // Get indexes of the columns we sort by (in order of sorting)
-        // Call the sort function using a custom lambda based on the sorted columns
+        // Call the sort function using provided RowComparator
         std::sort(
                 lines.begin(),
                 lines.end(),
@@ -172,6 +175,7 @@ namespace bigCSV {
         //std::cout<<"calling distribute function"<<std::endl;
         std::vector<csvFile> out;
         std::string header = formatRow(schema, delimiter, quotechar, endline);
+        int line_count = 0;
 
         open_input_stream();
         while(not_eof()){
@@ -181,9 +185,9 @@ namespace bigCSV {
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
-            std::uintmax_t file_size = header.size();
+            std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
-            while(not_eof() && file_size < max_filesize){      // CHANGE MAX FILE SIZE (for in-memory sort)
+            while(not_eof() && file_size < 100000){      // CHANGE MAX FILE SIZE (for in-memory sort)
                 auto line = getNextLine();
                 if(!conditions.Hold(line)) continue;
                 auto row = formatRow(line, delimiter, quotechar, endline);

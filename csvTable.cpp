@@ -36,6 +36,7 @@ namespace bigCSV{
 
     // Given 2 sorted files, returns a sorted file containing the rows of the 2 files
     bigCSV::csvFile csvTable::merge2(csvFile& first, csvFile& second, const RowComparator& comp) const{
+        int out_rows = 0;
         // Open input files
         first.open_input_stream();
         second.open_input_stream();
@@ -56,23 +57,29 @@ namespace bigCSV{
         // Merge
         while(!first_columns.empty && !second_columns.empty){
             if(comp(first_columns, second_columns)){
+                out_rows++;
                 out_stream<<formatRow(first_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
                 first_columns = first.getNextTableRow();
             }
             else{
+                out_rows++;
                 out_stream<<formatRow(second_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
                 second_columns = second.getNextTableRow();
             }
         }
         while(!first_columns.empty){
+            out_rows++;
             out_stream<<formatRow(first_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
             first_columns = first.getNextTableRow();
         }
         while(!second_columns.empty){
+            out_rows++;
             out_stream<<formatRow(second_columns.toLine(schema), in_delimiter, in_quotechar, in_endline);
             second_columns = second.getNextTableRow();
         }
 
+        first.close_input_stream();
+        second.close_input_stream();
         return csvFile(std::move(out_file), in_delimiter, in_endline, in_quotechar);
     }
 
@@ -112,11 +119,12 @@ namespace bigCSV{
 
         // Merge files from input_v to output_v until there is ony one left
         while(input_v->size() > 1){
+            //std::cout<<"Input size = "<<input_v->size()<<std::endl;
             output_v->clear();
-            for(int i=1; i<input_v->size(); i+=2){
+            for(int i=1; i<=input_v->size(); i+=2){
                 // The last file (if the number of files is odd) is just placed to the output_v
                 if(i == input_v->size()) {
-                    output_v->emplace_back(std::move((*input_v)[i - 1]));
+                    output_v->emplace_back(std::move((*input_v)[input_v->size() - 1]));
                 }
                 else{
                     output_v->emplace_back(merge2((*input_v)[i-1],(*input_v)[i],comp));
@@ -124,6 +132,9 @@ namespace bigCSV{
             }
             std::swap(output_v, input_v);
         }
+
+        //std::cout<<"Input size = "<<input_v->size()<<std::endl;
+
 
         // There is only one file in the input_v - means everythng is sorted
             // Firstly, header has to be added
