@@ -101,7 +101,7 @@ namespace bigCSV{
 
         // Firstly, divide the input files into small enough fiels to be sorted in-memory and sort them
         for(auto&& file : input_files){
-            auto dist_files = file.second.distribute(conditions, max_filesize);
+            auto dist_files = file.second.distribute(conditions, columns, max_filesize);
             for(auto&& dist_file : dist_files){
                 auto tmp_file = tmpFileFactory::get_tmpFile();
                 std::ofstream of(tmp_file.get_path(), std::ofstream::trunc);
@@ -132,7 +132,6 @@ namespace bigCSV{
             }
             std::swap(output_v, input_v);
         }
-
         //std::cout<<"Input size = "<<input_v->size()<<std::endl;
 
 

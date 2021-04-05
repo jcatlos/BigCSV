@@ -38,9 +38,10 @@ namespace bigCSV{
         char c = *(++line_it);
         while(true) {
             if (c == quotechar) {
-                if (++line_it == line.end()) break;         // If the in_quotechar is at the end of the line, the quoted string ends
+                line_it++;
+                if (line_it == line.end()) break;         // If the in_quotechar is at the end of the line, the quoted string ends
                 c = *(line_it);                                   // Now c is the char after the in_quotechar
-                if (c == quotechar) out += quotechar;       // Else if c is not in_quotechar (escaping is done by double in_quotechar), the quoted string ends
+                if (c == quotechar) out += quotechar;      // Else if c is not in_quotechar (escaping is done by double in_quotechar), the quoted string ends
                 else break;
             }
             else if (line_it == line.end()) {               // If a in_endline is encountered while in quoted sequence, the line end is a part of the cell
@@ -55,7 +56,15 @@ namespace bigCSV{
             }
             c = *(++line_it);                               // Read the next character
         }
+        return out;
+    }
 
+    std::string doubleQuotechar(const std::string& input, char quotechar){
+        std::string out = "";
+        for(int i=0; i<input.length(); i++){
+            if(input[i] == quotechar) out += quotechar;
+            out += input[i];
+        }
         return out;
     }
 
@@ -64,10 +73,10 @@ namespace bigCSV{
         std::string output = "";
         if(cells.empty()) return output;
 
-        output += quotechar + cells[0] + quotechar;
+        output += quotechar + doubleQuotechar(cells[0], quotechar) + quotechar;
         for(int i = 1; i<cells.size(); i++){
             output += delimiter;
-            output += quotechar + cells[i] + quotechar;
+            output += quotechar + doubleQuotechar(cells[i], quotechar) + quotechar;
         }
         output += endline;
 

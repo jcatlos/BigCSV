@@ -59,17 +59,16 @@ namespace bigCSV {
 
         // Eat all of the whitespace before the first token
         std::string::const_iterator line_it = line.begin();
-        while(std::isspace(*line_it) && line_it != line.end()) line_it++;
+        while(line_it != line.end() && std::isspace(*line_it)) line_it++;
 
         std::string token = "";
         while (line_it != line.end()) {
             char c = *line_it;
-
             // Parse quoted strings
             if (c == quotechar) {
                 token = "";
                 token += getQuotedString(input_stream, line_it, line, quotechar, endline);
-                while(std::isspace(*line_it) && line_it != line.end()) line_it++;
+                while(line_it != line.end() && std::isspace(*line_it)) line_it++;
                 if(line_it == line.end()) break;
                 c = *line_it;
             }
@@ -79,7 +78,7 @@ namespace bigCSV {
                 out.push_back(token);
                 token = "";
                 line_it++;
-                while(std::isspace(*line_it) && line_it != line.end()) line_it++;
+                while(line_it != line.end() && std::isspace(*line_it)) line_it++;
             }
 
             // Otherwise just add the character to the token
@@ -95,11 +94,26 @@ namespace bigCSV {
         return out;
     }
 
+    // Mask construction
+        // Mask = vector of indexes of columns to be printed
+        // If a column name is not found in the columns of the file, MAXINT is set and skipped in selection
+    std::vector<int> csvFile::create_mask(const std::vector<std::string>& input_columns){
+        std::vector<int> line_mask;
+        for(const auto& column : input_columns){
+            auto trimmed_col = trimmedString(column);
+            if(columns.find(trimmed_col) == columns.end()) line_mask.push_back(INT32_MAX);
+            else line_mask.push_back(columns[trimmed_col]);
+        }
+        return line_mask;
+    }
+
     TableRow csvFile::getNextTableRow() {
         TableRow out;
         if(not_eof()){
             auto line = getNextLine();
+            //for(const auto& token : line) std::cout<<token<<" || ";
             for(int i=0; i<line.size(); i++){
+                //std::cout<<"i = "<<i<<" schema size = "<<schema.size()<<std::endl;
                 out.empty = false;
                 out.map[schema[i]] = line[i];
                 out.schema.push_back(schema[i]);
@@ -121,22 +135,12 @@ namespace bigCSV {
     void csvFile::printColumns(std::ostream& out, const std::vector<std::string>& input_columns, const Conditions& conditions, char out_delimiter, char out_quotechar, char out_endline) {
         open_input_stream();
         std::vector<std::string> line_tokens;
-
-        // Mask construction
-            // Mask = vector of indexes of columns to be printed
-            // If a column name is not found in the columns of the file, MAXINT is set and skipped in selection
-        std::vector<int> line_mask;
-        for(const auto& column : input_columns){
-            auto trimmed_col = trimmedString(column);
-            if(columns.find(trimmed_col) == columns.end()) line_mask.push_back(INT32_MAX);
-            else line_mask.push_back(columns[trimmed_col]);
-        }
-
-        // Printing columns
+        std::vector<int> line_mask = create_mask(input_columns);
         std::vector<std::string> out_tokens;
+
         while(not_eof()){
             line_tokens = getNextLine();
-            if(!conditions.Hold(line_tokens)) continue;                               // If the line does not pas the condition, skip it
+            if(!conditions.Hold(line_tokens)) continue;                         // If the line does not pas the condition, skip it
             // Construct the line for output
             out_tokens.clear();
             for(auto&& index : line_mask){
@@ -172,25 +176,33 @@ namespace bigCSV {
     }
 
     std::vector<csvFile> csvFile::distribute(const Conditions& conditions, std::size_t max_filesize){
+        return distribute(conditions, schema, max_filesize);
+    }
+
+    std::vector<csvFile> csvFile::distribute(const Conditions& conditions, const std::vector<std::string>& input_columns, std::size_t max_filesize){
         //std::cout<<"calling distribute function"<<std::endl;
         std::vector<csvFile> out;
-        std::string header = formatRow(schema, delimiter, quotechar, endline);
-        int line_count = 0;
+        std::vector<int> line_mask = create_mask(input_columns);
+        std::string header = formatRow(input_columns, delimiter, quotechar, endline);
 
         open_input_stream();
         while(not_eof()){
             // Create next output file
             auto tmp_file = tmpFileFactory::get_tmpFile();
-            //std::cout<<"file "<<tmp_file.get_path()<<" opened"<<std::endl;
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
             out_file<<header;
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
-            while(not_eof() && file_size < 100000){      // CHANGE MAX FILE SIZE (for in-memory sort)
-                auto line = getNextLine();
-                if(!conditions.Hold(line)) continue;
-                auto row = formatRow(line, delimiter, quotechar, endline);
+            while(not_eof() && file_size < max_filesize){      // CHANGE MAX FILE SIZE (for in-memory sort)
+                auto line_tokens = getNextLine();
+                std::vector<std::string> out_tokens;
+                if(!conditions.Hold(line_tokens)) continue;
+                for(auto&& index : line_mask){
+                    if(line_tokens.size() <= index) out_tokens.push_back("");       // If index is too high, skip it
+                    else out_tokens.push_back(line_tokens[index]);
+                }
+                auto row = formatRow(out_tokens, delimiter, quotechar, endline);
                 file_size += row.size();
                 out_file<<row;
             }

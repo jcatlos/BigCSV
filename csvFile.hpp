@@ -64,6 +64,11 @@ namespace bigCSV {
 
         void open_input_stream() ;
         void close_input_stream() ;
+
+        std::vector<int> create_mask(const std::vector<std::string> &input_columns);
+
+        std::vector<csvFile>
+        distribute(const Conditions &conditions, const std::vector<std::string> &input_columns, size_t max_filesize);
     };
 }
 
