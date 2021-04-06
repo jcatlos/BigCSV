@@ -3,8 +3,6 @@ project(catlos)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CXX_FLAGS "-lstdc++fs" )
-
 add_executable(catlos
         src/csvFile.cpp
         src/csvFile.hpp

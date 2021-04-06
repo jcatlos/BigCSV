@@ -243,6 +243,10 @@ namespace bigCSV {
             sort = true;
             std::vector<std::string> order_by;
             while(index<command.size() && command[index] != "INTO"){
+                if(index_of(command[index], selected_columns) < 0 ){
+                    err_stream<<"Error: An order column must be in the selected columns" <<std::endl;
+                    return;
+                }
                 order_by.push_back(command[index]);
                 index++;
             }
