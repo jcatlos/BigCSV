@@ -2,7 +2,7 @@
 // Created by jakub on 3. 4. 2021.
 //
 
-#include <functionaL>
+#include <functional>
 #include <string>
 #include <vector>
 #include <map>
