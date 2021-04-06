@@ -1,0 +1,3 @@
+/home/jakub/cpp-zapoctak/catlos/build/CMakeFiles/edit_cache.dir
+/home/jakub/cpp-zapoctak/catlos/build/CMakeFiles/rebuild_cache.dir
+/home/jakub/cpp-zapoctak/catlos/build/CMakeFiles/catlos.dir

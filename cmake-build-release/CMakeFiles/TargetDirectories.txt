@@ -1,3 +1,0 @@
-C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/catlos.dir
-C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/edit_cache.dir
-C:/Users/jakub/Documents/GitHub/catlos/cmake-build-release/CMakeFiles/rebuild_cache.dir
