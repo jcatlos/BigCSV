@@ -3,7 +3,7 @@ project(catlos)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(catlos
+add_executable(BigCSV
         src/csvFile.cpp
         src/csvFile.hpp
         src/csvTable.cpp
