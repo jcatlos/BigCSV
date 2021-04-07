@@ -15,7 +15,9 @@ cmake --build .
 ```
 This approach may work on Windows, as well, however it has not been tested
 ### Windows
-Use cmake GUI application
+Use cmake GUI application. Select the cloned repository as the source directory and a subdirectory `build` as the build directory.
+
+---
 
 Afterwards, the program is ready to be used. The executable is located in the `build` folder
 
@@ -40,7 +42,7 @@ Creates a table named `table_name`. If a value of an attribute is not provided, 
 ### ALTER TABLE
 **Syntax:** `ALTER TABLE table_name [SET att=val … ];`
 
-Alters an existing table with name `table_name` by modifying its [attributes](Attributes). Previous values of attributes are taken as the default values.
+Alters an existing table with name `table_name` by modifying its [attributes](#Table_attributes). Previous values of attributes are taken as the default values.
 
 ### INSERT
 **Syntax:** `INSERT INTO table_name FILE path [DELIMITER=delim] [ENDLINE=endl] [QUOTECHAR=qchar]`
