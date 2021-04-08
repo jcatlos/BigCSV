@@ -1,9 +1,7 @@
-#include <iostream>
 #include <vector>
 #include <functional>
 
 #include "helper.hpp"
-#include "csvTable.hpp"
 #include "csvFile.hpp"
 #include "shell.hpp"
 #include "Conditions.hpp"
@@ -54,7 +52,7 @@ namespace bigCSV {
          return true;
     }
 
-    bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, std::string>& attributes){
+    bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, std::string>& attributes) const{
         auto result = split(pair, '=');
         // Invalid form of attribute setting
         if(result.size() != 2) return false;
@@ -65,7 +63,7 @@ namespace bigCSV {
         return true;
     }
 
-    std::map<std::string, std::string> Shell::get_attribute_map(int& index){
+    std::map<std::string, std::string> Shell::get_attribute_map(int& index) const{
         std::map<std::string, std::string> atts;
         atts["DELIMITER"] = ",";
         atts["QUOTECHAR"] = "\"";
@@ -83,7 +81,7 @@ namespace bigCSV {
         }
     }
 
-    bool Shell::modify_attribute_map(int& index, std::map<std::string, std::string>& atts){
+    bool Shell::modify_attribute_map(int& index, std::map<std::string, std::string>& atts) const{
         // If there are attributes to be parsed, parse them
         if(index < command.size() && command[index] == "SET"){
             int start_index = index;
@@ -132,20 +130,19 @@ namespace bigCSV {
         return out;
     }
 
+    // Extracts commant from the in istream, divides it up into tokens and saves them to the Shell.command vector
     void Shell::get_command(std::istream &in) {
-        command.clear();
-        std::getline(in, line ,';');
+        if(&in == &std::cin) std::cout<<std::endl<<"bigCSV> ";
+        std::getline(in, command_line ,';');
         std::string word = "";
-        auto it = line.begin();
-        while(it != line.end()){
-            word = "";
-            while(word.empty()){
-                word = getNextWord(line, it);
-            }
+        auto it = command_line.begin();
+        while(it != command_line.end()){
+            word = getNextWord(command_line, it);
             command.push_back(word);
         }
     }
 
+    // Parses the content of 
     void Shell::create(){
         if(command.size() < 3 && command[1]!="TABLE"){
             err_stream<<"Invalid command form";
@@ -207,7 +204,11 @@ namespace bigCSV {
     }
 
     void Shell::select() {
-        //std::cout<<"SELECT"<<std::endl;
+        if(command.size() < 3) {
+            err_stream<<"Invalid command form";
+            return;
+        }
+
         bool sort = false;                                              // If the output has to be sorted
         bool to_file = false;                                           // If the output is directed into a file (otherwise goes to std::cout)
         std::ofstream file_stream;
@@ -273,7 +274,8 @@ namespace bigCSV {
 
     void Shell::insert(){
         // Check the form of the statement
-        if(command.size() < 5 || command[1] != "INTO" || command[3] != "PATH" ){
+        std::cout<<command.size();
+        if(command.size() <= 5 || command[1] != "INTO" || command[3] != "PATH" ){
             err_stream<<"Invalid command form";
             return;
         }
@@ -343,6 +345,7 @@ namespace bigCSV {
     void Shell::run(){
         while(true){
             get_command(in_stream);
+            if(command.size() < 1) continue;
             std::string word = command[0];
 
             // CREATE TABLE
@@ -366,8 +369,10 @@ namespace bigCSV {
                 select();
             }
             else {
-                err_stream<<"ERROR Unknown command: "<<line<<std::endl;
+                err_stream<<"ERROR Unknown command: "<<command_line<<std::endl;
             }
+
+            command.clear();
         }
     }
 }

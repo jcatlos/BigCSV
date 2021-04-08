@@ -1,14 +1,15 @@
-//
-// Created by jakub on 30. 3. 2021.
-//
+#ifndef BIGCSV_TMPFILEFACTORY_HPP
+#define BIGCSV_TMPFILEFACTORY_HPP
 
-#ifndef CATLOS_TMPFILEFACTORY_HPP
-
-#define CATLOS_TMPFILEFACTORY_HPP
 #include <filesystem>
 #include "file.hpp"
 
 namespace bigCSV{
+
+    // A Singleton used to create unique temporary files
+        // By being a Singleton, it is the only authority to create files 
+            // -> Guaranteed uniqueness across the program
+
     class tmpFileFactory {
     public:
         tmpFileFactory(const tmpFileFactory&) = delete;
@@ -31,5 +32,4 @@ namespace bigCSV{
     };
 }
 
-
-#endif //CATLOS_TMPFILEFACTORY_HPP
+#endif

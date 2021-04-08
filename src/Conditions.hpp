@@ -1,13 +1,9 @@
-//
-// Created by jakub on 2. 4. 2021.
-//
+#ifndef BIGCSV_CONDITIONS_HPP
+#define BIGCSV_CONDITIONS_HPP
 
 #include <functional>
 #include <vector>
 #include <string>
-
-#ifndef CATLOS_CONDITIONS_HPP
-#define CATLOS_CONDITIONS_HPP
 
 namespace bigCSV{
     class Conditions{
@@ -19,11 +15,6 @@ namespace bigCSV{
         void AddIntLt(int index, std::string str);
         void AddIntGt(int index, std::string str);
     };
-
-    /*std::function<bool(const std::vector<std::string>&)> create_equal_check(int index, std::string str);
-    std::function<bool(const std::vector<std::string>&)> create_int_lt(int index, std::string str);
-    std::function<bool(const std::vector<std::string>&)> create_int_gt(int index, std::string str);
-    bool tautology(const std::vector<std::string> &v);*/
 }
 
-#endif //CATLOS_CONDITIONS_HPP
+#endif 

@@ -1,42 +1,51 @@
+#ifndef BIGCSV_SHELL_HPP
+#define BIGCSV_SHELL_HPP
+
 #include <fstream>
 #include <iostream>
 #include <map>
 
-
-#ifndef BIG_CSV_SHELL_HPP
-#define BIG_CSV_SHELL_HPP
+#include "csvTable.hpp"
 
 namespace bigCSV {
+
     class Shell{
     public:
         Shell(std::istream& in, std::ostream& err) : err_stream(err), in_stream(in) {}
         void run();
     private:
+        // Streams
         std::ostream& err_stream;
         std::istream& in_stream;
 
-        std::map<std::string, bigCSV::csvTable> tables;
-        std::string line;
+        // Map of created tables and a retrieval method
+        std::map<std::string, csvTable> tables;
+        csvTable* get_table(const std::string &name);
+        
+        // Currently parsed command in string and vector of token representation
+        std::string command_line;
         std::vector<std::string> command;
 
+        // Functions for command parsing
         void get_command(std::istream& in);
+        std::string getNextWord(std::string& line, std::string::iterator& it);
 
-        std::map<std::string, std::string> get_attribute_map(int& index);
-        bool modify_attribute_map(int& index, std::map<std::string, std::string>& atts);
-        bool set_map_attribute(const std::string &pair, std::map<std::string, std::string> &attributes);
+        // Attribute map functions
+        std::map<std::string, std::string> get_attribute_map(int& index) const;
+        bool modify_attribute_map(int& index, std::map<std::string, std::string>& atts) const;
+        bool set_map_attribute(const std::string &pair, std::map<std::string, std::string> &attributes) const;
 
+        // Functions for commands - only for better readibility
         void create();
         void select();
         void insert();
         void alter();
         void update();
 
-        std::string getNextWord(std::string& line, std::string::iterator& it);
-
+        // Where clause parser
         bool parse_where_clause(int &index, csvTable &table, Conditions &conditions);
 
-        csvTable* get_table(const std::string &name);
     };
 }
 
-#endif //BIG_CSV_SHELL_HPP
+#endif

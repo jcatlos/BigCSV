@@ -1,9 +1,5 @@
-//
-// Created by jakub on 31. 3. 2021.
-//
-
-#ifndef CATLOS_TABLEROW_HPP
-#define CATLOS_TABLEROW_HPP
+#ifndef BIGCSV_TABLEROW_HPP
+#define BIGCSV_TABLEROW_HPP
 
 #include <map>
 #include <string>
@@ -11,16 +7,19 @@
 
 namespace bigCSV{
     struct TableRow {
-        std::vector<std::string> schema;
-        std::vector<std::string> values;
-        std::map<std::string, std::string> map;
 
-        bool empty = true;
+        std::vector<std::string> schema;            // Names of the columns
+        std::vector<std::string> values;            // Values of the columns
+        std::map<std::string, std::string> map;     // A map from names to values
 
+        bool empty = true;      // If there are any values in the row
+
+        // Add a name -> value pair to the row
         void add(const std::string& col_name, const std::string& value);
-        //void add(std::string&& col_name, std::string&& value);
-        std::vector<std::string> toLine(const std::vector<std::string> &input_schema);
+
+        // Convert into a vector<string> with a given schema
+        std::vector<std::string> toLine(const std::vector<std::string> &input_schema) const;
     };
 }
 
-#endif //CATLOS_TABLEROW_HPP
+#endif 

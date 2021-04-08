@@ -1,17 +1,13 @@
-//
-// Created by jakub on 14. 3. 2021.
-//
-
-#include "csvFile.hpp"
-#include "helper.hpp"
-#include "tmpFileFactory.hpp"
-#include "Conditions.hpp"
-
 #include <fstream>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <algorithm>
+
+#include "csvFile.hpp"
+#include "helper.hpp"
+#include "tmpFileFactory.hpp"
+#include "Conditions.hpp"
 
 namespace bigCSV {
     csvFile::csvFile(const std::filesystem::path& fn, char delim, char le, char q)
@@ -51,11 +47,6 @@ namespace bigCSV {
 
         std::string line;
         std::getline(input_stream, line, endline);
-
-        /*if(line.length() == 0){
-            std::cerr<<"empty line"<<std::endl;
-            return out;
-        }*/
 
         // Eat all of the whitespace before the first token
         std::string::const_iterator line_it = line.begin();
@@ -111,9 +102,7 @@ namespace bigCSV {
         TableRow out;
         if(not_eof()){
             auto line = getNextLine();
-            //for(const auto& token : line) std::cout<<token<<" || ";
             for(int i=0; i<line.size(); i++){
-                //std::cout<<"i = "<<i<<" schema size = "<<schema.size()<<std::endl;
                 out.empty = false;
                 out.map[schema[i]] = line[i];
                 out.schema.push_back(schema[i]);
@@ -175,15 +164,14 @@ namespace bigCSV {
         }
     }
 
+    // A shorter overload selecting all columns
     std::vector<csvFile> csvFile::distribute(const Conditions& conditions, std::size_t max_filesize){
         return distribute(conditions, schema, max_filesize);
     }
 
     std::vector<csvFile> csvFile::distribute(const Conditions& conditions, const std::vector<std::string>& input_columns, std::size_t max_filesize){
-        //std::cout<<"calling distribute function"<<std::endl;
         std::vector<csvFile> out;
         std::vector<int> line_mask = create_mask(input_columns);
-        std::string header = formatRow(input_columns, delimiter, quotechar, endline);
 
         open_input_stream();
         while(not_eof()){
@@ -191,13 +179,14 @@ namespace bigCSV {
             auto tmp_file = tmpFileFactory::get_tmpFile();
             std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
             //Add the header row to each file
-            out_file<<header;
+            out_file << formatRow(input_columns, delimiter, quotechar, endline);
             std::uintmax_t file_size = 0;
             // Fill it while the main file is not empty or the output file is not full
-            while(not_eof() && file_size < max_filesize){      // CHANGE MAX FILE SIZE (for in-memory sort)
+            while(not_eof() && file_size < max_filesize){  
                 auto line_tokens = getNextLine();
                 std::vector<std::string> out_tokens;
-                if(!conditions.Hold(line_tokens)) continue;
+                if(!conditions.Hold(line_tokens)) continue;                         // Skip lines, where the condition does not hold
+                // Add all selected rows to line_tokens
                 for(auto&& index : line_mask){
                     if(line_tokens.size() <= index) out_tokens.push_back("");       // If index is too high, skip it
                     else out_tokens.push_back(line_tokens[index]);
@@ -212,16 +201,15 @@ namespace bigCSV {
         }
         close_input_stream();
 
-        std::cout<<"Distribute finished"<<std::endl;
-
         return out;
     }
 
+    // Creates a copy of the source csvFile with updated rows and returns appropriate csvFile 
     csvFile csvFile::createUpdatedFile(const Conditions &conditions, BigCSV::RowUpdate &update) {
-        std::string header = formatRow(schema, delimiter, quotechar, endline);
         auto tmp_file = tmpFileFactory::get_tmpFile();
         std::ofstream out_file(tmp_file.get_path(), std::ofstream::trunc);
-        out_file<<header;
+        out_file << formatRow(schema, delimiter, quotechar, endline);
+
         std::vector<std::string> line;
 
         open_input_stream();

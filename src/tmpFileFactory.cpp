@@ -1,7 +1,3 @@
-//
-// Created by jakub on 30. 3. 2021.
-//
-
 #include <string>
 
 #include "tmpFileFactory.hpp"
@@ -12,5 +8,6 @@ namespace bigCSV{
         return File(_tmp_dir / file_name, true);
     }
 
+    // Instantiation of the Singleton
     tmpFileFactory tmpFileFactory::_instance;
 }
