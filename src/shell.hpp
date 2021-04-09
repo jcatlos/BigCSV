@@ -28,7 +28,7 @@ namespace bigCSV {
 
         // Functions for command parsing
         void get_command(std::istream& in);
-        std::string getNextWord(std::string& line, std::string::iterator& it);
+        std::string getNextWord(std::string& line, std::string::iterator& it) const;
 
         // Attribute map functions
         std::map<std::string, std::string> get_attribute_map(int& index) const;

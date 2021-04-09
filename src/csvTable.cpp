@@ -1,7 +1,3 @@
-//
-// Created by jakub on 14. 3. 2021.
-//
-
 #include "csvTable.hpp"
 #include "helper.hpp"
 #include "tmpFileFactory.hpp"

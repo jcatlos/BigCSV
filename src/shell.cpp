@@ -32,7 +32,6 @@ namespace bigCSV {
                      err_stream<<"ERROR: Column '"<<first<<"' is not in table '"<<command[1]<<"'"<<std::endl;
                      return false;
                  }
-                 //std::cout<<"value = '"<<second<<"' at "<<col_index<<std::endl;
                  switch(operand[0]){
                      case '=':
                          conds.AddEquals(col_index, second);
@@ -59,7 +58,8 @@ namespace bigCSV {
         auto key_it = attributes.find(result[0]);
         // Invalid attribute name
         if(key_it == attributes.end()) return false;
-        key_it->second = result[1];
+        auto res_begin = result[1].begin();
+        key_it->second = getNextWord(result[1], res_begin);
         return true;
     }
 
@@ -99,7 +99,7 @@ namespace bigCSV {
     // Returns the next word in the line
         // Treats quoted strings as single words
         // in quoted strings, escaping via '\' is supported
-    std::string Shell::getNextWord(std::string& line, std::string::iterator& it){
+    std::string Shell::getNextWord(std::string& line, std::string::iterator& it) const{
         std::string out = "";
         while(it != line.end() && isspace(*it)) it++;        // Take all the whitespace before the next word
         bool quoted = *it == '"';
@@ -158,10 +158,22 @@ namespace bigCSV {
             return;
         }
 
+        int size;
+
+        try{
+            size = std::stoi(table_attributes["MAX_FILESIZE"]);
+            if(size < 1) throw std::invalid_argument("File size is less than 1");
+        }
+        catch (std::invalid_argument){
+            err_stream << "Error: MAX_FILESIZE is not a non-negative integer"<<std::endl;
+            return;
+        }
+
         tables[table_name] = bigCSV::csvTable(
-                table_attributes["DELIMITER"][0],
-                table_attributes["QUOTECHAR"][0],
-                table_attributes["ENDLINE"][0]
+            table_attributes["DELIMITER"][0],
+            table_attributes["QUOTECHAR"][0],
+            table_attributes["ENDLINE"][0],
+            size
         );
     }
 
@@ -275,7 +287,7 @@ namespace bigCSV {
     void Shell::insert(){
         // Check the form of the statement
         std::cout<<command.size();
-        if(command.size() <= 5 || command[1] != "INTO" || command[3] != "PATH" ){
+        if(command.size() < 5 || command[1] != "INTO" || command[3] != "PATH" ){
             err_stream<<"Invalid command form";
             return;
         }
@@ -324,8 +336,9 @@ namespace bigCSV {
         }
 
         try{
-            table->max_filesize = std::stoi(table_attributes["MAX_FILESIZE"]);
-            if(table->max_filesize < 1) throw std::invalid_argument("File size is less than 1");
+            auto size = std::stoi(table_attributes["MAX_FILESIZE"]);
+            if(size < 1) throw std::invalid_argument("File size is less than 1");
+            table->max_filesize = size;
         }
         catch (std::invalid_argument){
             err_stream << "Error: MAX_FILESIZE is not a non-negative integer"<<std::endl;
@@ -343,6 +356,14 @@ namespace bigCSV {
     }
 
     void Shell::run(){
+
+        // If using the std::cin for in_stream, display a message
+        if(&in_stream == &std::cin){
+            std::cout<<"BigCSV Shell: Program for manipulating large .csv files"<<std::endl;
+            std::cout<<"To exit the utility, type \"EXIT;\""<<std::endl;
+            std::cout<<"For instructions read the user documentation"<<std::endl;
+        }
+
         while(true){
             get_command(in_stream);
             if(command.size() < 1) continue;

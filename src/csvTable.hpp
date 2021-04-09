@@ -1,5 +1,5 @@
-#ifndef BIG_CSV_CSVTABLE_HPP
-#define BIG_CSV_CSVTABLE_HPP
+#ifndef BIGCSV_CSVTABLE_HPP
+#define BIGCSV_CSVTABLE_HPP
 
 #include <vector>
 #include <fstream>
@@ -28,14 +28,14 @@ namespace bigCSV{
         char out_quotechar;
         char out_endline;
 
-        std::size_t max_filesize = 13500;
+        int max_filesize = 13500;
 
         // Vector of names of all columns in the table
         std::vector<std::string> schema;
 
         // Constructors - with and without efault values
-        csvTable(char delim, char qchar, char endl)
-            : in_delimiter(delim), in_quotechar(qchar), in_endline(endl), out_delimiter(delim), out_quotechar(qchar), out_endline(endl){}
+        csvTable(char delim, char qchar, char endl, int size)
+            : in_delimiter(delim), in_quotechar(qchar), in_endline(endl), out_delimiter(delim), out_quotechar(qchar), out_endline(endl), max_filesize(size){}
         csvTable()
             : in_delimiter(','), in_quotechar('"'), in_endline('\n'), out_delimiter(','), out_quotechar('"'), out_endline('\n'){}
 
@@ -56,6 +56,5 @@ namespace bigCSV{
         void updateTable(const Conditions &conditions, BigCSV::RowUpdate &update);
     };
 }
-
 
 #endif

@@ -31,11 +31,13 @@ Afterwards, the program is ready to be used. The executable is located in the `b
 ## Usage
 The utility takes arguements via the standrd input. To create and use a script, just write it down to a text file and launch the utility by `BigCSV < [file_name]`.
 
+> **Note:** All tables are stored only in memory. Therefore any modifications performed by changing output attributes or using the `UPDATE` are not saved. If you wish to save them, use the `SELECT` command with the `INTO` clause to save the chnges into a file which can be then loaded as a separate table.
+
 Command are always ended by a semicolon `;`. All tokens are divided by any whitespace. A token containing a whitespoace must be inside double quotes `"`.
 
-If an error is encountered while parsing a command, no changes to the tables happen.
+> **Note:** The command parsing process  commands until the next `;` before any text processing happens. This results in the inability to use the semicolon character in the shell environment.
 
-> **Note:** All tables are stored only in memory. Therefore any modifications performed by changing output attributes or using the `UPDATE` are not saved. If you wish to save them, use the `SELECT` command with the `INTO` clause to save the chnges into a file which can be then loaded as a separate table.
+If an error is encountered while parsing a command, no changes to the tables happen.
 
 ### Paths
 When using a path, use `/` as directory separator, even on Windows. Also note that the executable is located in the `build` directory. Relative paths are acceptable.
@@ -59,13 +61,17 @@ Alters an existing table with name `table_name` by modifying its [attributes](#T
 
 Adds a file located at `path` to an existing table `table_name` as a source of data. **In no moment is the soucre file modified.** `DELIMITER`, `ENDLINE` and `QUOTECHAR` signify the delimiter of the tokens, the delimiter of the rows and th character used to optionally encapsulate tokens of the file. If none given, the values of `IN_DELIMITER`, `IN_ENDLINE` and `IN_QUOTECHAR` of the table `table_name` are used.
 
+> **Note:** Shell not check for the existence of the provided file. If a non-existing file there should be no problems, however this was not tested.
+
+> **Note:** Setting other attributes does not throw an error, however their values are ignored.
+
 ### UPDATE
 **Syntax:** `UPDATE table_name SET col1=val1 … [WHERE cond ...];`
 
 Modifies the values in the existing table `table_name` by setting the specified columns to specified values. This modification can be restricted by the `WHERE` clause. Then only the rows fullfilling all conditions in the clause are modified. In the process of the modification, all the source files are copied into [temporary files]. 
 
 ### SELECT
-**Syntax:** `SELECT col1 … coln FROM table_name [WHERE cond] [ORDER BY col1 … ] [INTO path];`
+**Syntax:** `SELECT col1 … coln FROM table_name [WHERE [cond ...]] [ORDER BY col1 … ] [INTO path];`
 
 Prints the columns specified by their names in the source files from an existing table `table_name`. These results may be filtered by the `WHERE` clause and ordered by the `ORDER BY` clause. If a `INTO` clause is present, the output is instead saved into provided relative path `path`. Errors and warnings are still printed to the standard error output.
 
@@ -73,7 +79,7 @@ The columns of the `ORDER BY` clause *must* be a subset of the selected columns.
 By using the `ORDER BY` clause, the sorting process is started. The files are distributed into temporary partition files of [`MAX_FILESIZE`](#Table-attributes), which are sorted in memory and then merged into one file.
 
 ### WHERE clause
-**Syntax:** `WHERE condition1 condition2 ...`
+**Syntax:** `WHERE [condition1 ...]`
 This clause is used to filter the rows of a query by provided conditions in the form of `col_name [operator] value`. `col_name` is a name of a column in the table and `value` is a constant. There are currently 3 operators in the utility: string equality (`=`), integer greater than, and lower than (`>` and `<`, respectively). **All** conditions must hold for the row to be selected.
 
 ## Table attributes
