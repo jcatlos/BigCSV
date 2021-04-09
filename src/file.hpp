@@ -27,7 +27,7 @@ namespace bigCSV{
         ~File();
 
         // A getter for the file's path
-        inline const std::filesystem::path get_path() const{
+        inline const std::filesystem::path& get_path() const{
             return path;
         }
 

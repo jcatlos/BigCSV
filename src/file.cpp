@@ -1,7 +1,3 @@
-//
-// Created by jakub on 30. 3. 2021.
-//
-
 #include "file.hpp"
 #include <iostream>
 

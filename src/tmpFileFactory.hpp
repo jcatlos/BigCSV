@@ -12,22 +12,25 @@ namespace bigCSV{
 
     class tmpFileFactory {
     public:
-        tmpFileFactory(const tmpFileFactory&) = delete;
-
-        static tmpFileFactory& get() {
-            return _instance;
-        }
-
+        // Creates an instance of File with an unique name and the temporary bit set to true
+            // Called as tmpFileFactory::get_tmpFile()
         static File get_tmpFile(){
             return get()._get_file_impl();
         }
+
+        // Singleton declarations
+        tmpFileFactory(const tmpFileFactory&) = delete;
+        static tmpFileFactory& get() {
+            return _instance;
+        }
     private:
-        File _get_file_impl();
-        tmpFileFactory()= default;
-
-        int _file_count = 0;
+        // File names are created as "[_tmp_dir]/tmp_file_[_file_count].csv"
+        std::size_t _file_count = 0;
         std::filesystem::path _tmp_dir = std::filesystem::temp_directory_path();
+        File _get_file_impl();
 
+        // Singleton declaration
+        tmpFileFactory()= default;
         static tmpFileFactory _instance;
     };
 }

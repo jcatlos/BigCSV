@@ -92,33 +92,57 @@ This is the only public function of the `Shell` class serving to launch an intan
 ### Database
 
 #### csvTable
-The `csvTable` represents a 'table' of csv files. It manages its instances of [csvFile](#csvFile) ant is the interface for access to the data. The table itself **does not** manipulate any data of the files, instead it creates a copy of the file and modifies the copy.
+The `csvTable` represents a 'table' of csv files. It manages its instances of [csvFile](#csvFile) and is the interface for access to the data. The table itself **does not** manipulate any data of the files, instead it creates a copy of the file and modifies the copy.
 ##### Attributes
 ##### Constructors
 ##### Functions
+
 #### csvFile
 ##### Attributes
 ##### Constructors
 ##### Functions
+
 #### File
+Is a class that manages a file. Semantically, there should be a one-to-one relationship betweena a physical file and a `File` instance, therefore the copy-constructor is deleted as well as the empty-constructor. Move-constructor is implemented as it does not affect this rule. 
 ##### Attributes
+* `private filesystem::path path` : The path to the managed file. The path must not be modified, however the `get_path()` function retuns its copy.
+* `private bool temporary` : Signifies,m whether the file is a temporary file. If the file is temporary, it is deleted upon the destruction of the `File` instance managing it.
 ##### Constructors
-##### Functions
+* `File(filesystem::path p, bool temp)`
+* `explicit File(filesystem::path p)`  
+* `File(const File& file) = delete` 
+* `File(File&& file) noexcept`
+##### Destructor
+If the source file exists and the `temporary` bit is set, the file is deleted.
+##### `const filesystem::path& get_path() const`
+Returns a const reference of the `path` to prevent from its modification.
+
 #### TmpFileFactory
+Is a singleton object managing the creation of unique temporary files for the table. Has an internal count of created files which is used to create unique names for the files. 
 ##### Attributes
+* `size_t _file_count` : The counter of creted temporary files
+* `filesystem::path _tmp_dir` : The path to the system's folder to temporary files
 ##### Functions
+###### _get_file_impl()
+**Signature:** `private File _get_file_impl()`  
+
+Returns `File` with the `temporary` bit set to true, so the file will be deleted when the program ends. The file name is constructed as `[_tmp_dir]/tmp_file_[_file_count].csv`, then the `_file_count is incremented.
+
 #### TableRow
 ##### Attributes
 ##### Constructors
 ##### Functions
+
 #### RowUpdate
 ##### Attributes
 ##### Constructors
 ##### Functions
+
 #### RowComparator
 ##### Constructors
 ##### Attributes
 ##### Functions
+
 #### Conditions
 ##### Attributes
 ##### Constructors
