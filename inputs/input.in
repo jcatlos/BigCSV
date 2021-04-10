@@ -1,5 +1,5 @@
 CREATE TABLE test;
-INSERT INTO test PATH "inputs/input2.csv";
+INSERT INTO test PATH "../inputs/large_input.csv";
 ALTER TABLE test SET MAX_FILESIZE=50000;
 SELECT "NazevZarizeni" "Obec" FROM test ORDER BY "Obec";
 EXIT;
