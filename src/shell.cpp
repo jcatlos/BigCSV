@@ -305,6 +305,11 @@ namespace bigCSV {
             return;
         }
 
+        if(!std::filesystem::exists(path)){
+            err_stream<<"Error: The provied file does not exist"<<std::endl;
+            return;
+        }
+
         table->addFile(path, file_attributes["IN_DELIMITER"][0], file_attributes["IN_ENDLINE"][0],
                                    file_attributes["IN_QUOTECHAR"][0]);
 
