@@ -14,6 +14,7 @@ namespace bigCSV{
         void AddEquals(int index, std::string str);
         void AddIntLt(int index, std::string str);
         void AddIntGt(int index, std::string str);
+        void AddOther(std::function<bool(const std::vector<std::string>&)>&& condition);
     };
 }
 

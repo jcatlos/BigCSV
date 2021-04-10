@@ -129,9 +129,22 @@ Is a singleton object managing the creation of unique temporary files for the ta
 Returns `File` with the `temporary` bit set to true, so the file will be deleted when the program ends. The file name is constructed as `[_tmp_dir]/tmp_file_[_file_count].csv`, then the `_file_count is incremented.
 
 #### TableRow
+Is a class for representing a data from a row in a structured way. This allows to query for values of specific columns of the row more effectively. All attributes and methods are public. The implementation is located in the `TableRow.hpp` and `TableRow.cpp` files.
 ##### Attributes
+* `vector<string> schema` : Vector of names of the columns in the row.
+* `vector<string> values` : Vector of values of the columns. They are in the same order as in schema
+* `map<string, string> map` : A map from column names to their values
+* `bool empty` : Whethwer the `TableRow` is valid
 ##### Constructors
+Has only the implicit constructor (). variable `empty` is by default set to true and it has to be changed if the row is modified manually (does not apply when using `add()`).
 ##### Functions
+###### add()
+**Signature:** `void add(const string& col_name, const string& value);`
+Given a column's name and its value, adds this pair into its internal data structures. If the `col_name` is already present, its value is modified.
+
+###### toLine()
+**Signature:** `vector<string> toLine(const vector<string>& input_schema) const;`
+Returns a vector of string of the values in the order specified by `input_schema`. If a value from the `input_schema` is not present in the row, an empty string is in its position to ensure that each value is in its corresponding place on the line.
 
 #### RowUpdate
 ##### Attributes
@@ -144,10 +157,22 @@ Returns `File` with the `temporary` bit set to true, so the file will be deleted
 ##### Functions
 
 #### Conditions
+Represents a set of conditions to a row of the table. They are used for filtering rows in queries (in the [shell](#Shell) they are used by the `WHERE` clause). Each condition is a `std::function<bool(const vector<string>&)>`, where the input is the row of a table and thereturned value is whether the condition holds on the row. The implementation is located in the `Conditions.hpp` and `Conditions.cpp` files.
 ##### Attributes
+* `private vector<function<bool(const vector<string>&)>> conditions` : Is the set of the conditions for a row. The term 'set' is used as their order and multiple occurences do not matter for the result of the `Hold()` function.
 ##### Constructors
+Has only the implicit constructor `Conditions()`. An empty set of contitions is always satisfied.
 ##### Functions
+All functions are public.
+###### Hold()
+**Signature:** ` bool Hold(const vector<string>& row) const`
 
+Tests all functions in the `conditions` vector. If any of them returns `false`, returns `false`. Otherwise returns `true`.
+###### Functions for adding conditions
+* `void AddEquals(int index, string str)` : Adds a condition evaluating the *string equaity* between the value of `index`-th column and `str`.
+* `void AddIntLt(int index, string str)` : Adds a condition evaluating whether the `index`-th value can be converted to `int` and then performs a less than comparison between the int and the `str` converted to int. if the `str` cannot be converted to `int`, the condition always returns `false`.
+* `void AddIntGt(int index, string str)` : Works like `AddIntGt()`, however evaluates whether the value is greater than the provided value.
+* `void AddOther(function<bool(const vector<string>&)>&& condition)` : This allows to add any user specified condition with the corresponding interface.
 ---
 
 ### Helper functions

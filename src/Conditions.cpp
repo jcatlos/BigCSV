@@ -50,4 +50,9 @@ namespace bigCSV{
     void Conditions::AddIntGt(int index, std::string str) {
         conditions.push_back(std::bind(int_gt, std::placeholders::_1, index, str));
     }
+
+    // Allows for inserting a different function
+    void Conditions::AddOther(std::function<bool(const std::vector<std::string>&)>&& condition){
+        conditions.push_back(condition);
+    }
 }

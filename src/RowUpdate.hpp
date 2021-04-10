@@ -11,7 +11,7 @@ namespace BigCSV{
     class RowUpdate {
     private:
         // Stores transformations based on the index to be applied to
-            // Only one update per row
+            // Only one update per colums
             // Could be modified to a vector of functions and the apply function modified
                 // However now it is not needed
         std::map<std::size_t, std::function<std::string(const std::string&)>> rowMap;

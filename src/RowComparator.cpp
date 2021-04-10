@@ -16,6 +16,6 @@ namespace bigCSV{
             if(result < 0) return true;
             if(result > 0) return false;
         }
-        return false;
+        return true;
     }
 }

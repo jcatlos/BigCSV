@@ -14,6 +14,7 @@ namespace bigCSV{
         std::vector<std::string> order;
     public:
         // Constructor takes a vector of column names in order of their importance
+        RowComparator() = delete;
         explicit RowComparator(std::vector<std::string>&& o) : order(std::move(o)) {}
         
         // Compare 2 values based on the given order
