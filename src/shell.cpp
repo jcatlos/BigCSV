@@ -305,8 +305,8 @@ namespace bigCSV {
             return;
         }
 
-        table->addFile(path, file_attributes["DELIMITER"][0], file_attributes["ENDLINE"][0],
-                                   file_attributes["QUOTECHAR"][0]);
+        table->addFile(path, file_attributes["IN_DELIMITER"][0], file_attributes["IN_ENDLINE"][0],
+                                   file_attributes["IN_QUOTECHAR"][0]);
 
     }
 
