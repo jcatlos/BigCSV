@@ -65,9 +65,9 @@ namespace bigCSV {
 
     std::map<std::string, std::string> Shell::get_attribute_map(int& index) const{
         std::map<std::string, std::string> atts;
-        atts["DELIMITER"] = ",";
-        atts["QUOTECHAR"] = "\"";
-        atts["ENDLINE"] = "\n";
+        atts["IN_DELIMITER"] = ",";
+        atts["IN_QUOTECHAR"] = "\"";
+        atts["IN_ENDLINE"] = "\n";
         atts["OUT_DELIMITER"] = ",";
         atts["OUT_QUOTECHAR"] = "\"";
         atts["OUT_ENDLINE"] = "\n";
@@ -170,9 +170,9 @@ namespace bigCSV {
         }
 
         tables[table_name] = bigCSV::csvTable(
-            table_attributes["DELIMITER"][0],
-            table_attributes["QUOTECHAR"][0],
-            table_attributes["ENDLINE"][0],
+            table_attributes["IN_DELIMITER"][0],
+            table_attributes["IN_QUOTECHAR"][0],
+            table_attributes["IN_ENDLINE"][0],
             size
         );
     }
@@ -322,9 +322,9 @@ namespace bigCSV {
 
         int index = 3;
         std::map<std::string, std::string>table_attributes;
-        table_attributes["DELIMITER"] = table->in_delimiter;
-        table_attributes["QUOTECHAR"] = table->in_quotechar;
-        table_attributes["ENDLINE"] = table->in_endline;
+        table_attributes["IN_DELIMITER"] = table->in_delimiter;
+        table_attributes["IN_QUOTECHAR"] = table->in_quotechar;
+        table_attributes["IN_ENDLINE"] = table->in_endline;
         table_attributes["OUT_DELIMITER"] = table->out_delimiter;
         table_attributes["OUT_QUOTECHAR"] = table->out_quotechar;
         table_attributes["OUT_ENDLINE"] = table->out_endline;
@@ -345,9 +345,9 @@ namespace bigCSV {
             return;
         }
 
-        table->in_delimiter = table_attributes["DELIMITER"][0];
-        table->in_quotechar = table_attributes["QUOTECHAR"][0];
-        table->in_endline = table_attributes["ENDLINE"][0];
+        table->in_delimiter = table_attributes["IN_DELIMITER"][0];
+        table->in_quotechar = table_attributes["IN_QUOTECHAR"][0];
+        table->in_endline = table_attributes["IN_ENDLINE"][0];
         table->out_delimiter = table_attributes["OUT_DELIMITER"][0];
         table->out_quotechar = table_attributes["OUT_QUOTECHAR"][0];
         table->out_endline = table_attributes["OUT_ENDLINE"][0];
