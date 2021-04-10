@@ -91,6 +91,9 @@ namespace bigCSV{
         // Filters the rows based on provided condition
         // Selects only the provided columns
     void csvTable::sort(std::ostream& out, const RowComparator &comp, const Conditions& conditions, const std::vector<std::string>& columns) {
+        // If there are no files to be sorted, just return
+        if(input_files.empty()) return;
+        
         // Using 2 vectors of files - In each iteration, files from one are merged and placed into second
         std::vector<csvFile> files1;
         std::vector<csvFile> files2;
