@@ -286,7 +286,6 @@ namespace bigCSV {
 
     void Shell::insert(){
         // Check the form of the statement
-        std::cout<<command.size();
         if(command.size() < 5 || command[1] != "INTO" || command[3] != "PATH" ){
             err_stream<<"Invalid command form";
             return;
