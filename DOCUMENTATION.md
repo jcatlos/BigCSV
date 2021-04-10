@@ -147,15 +147,46 @@ Given a column's name and its value, adds this pair into its internal data struc
 Returns a vector of string of the values in the order specified by `input_schema`. If a value from the `input_schema` is not present in the row, an empty string is in its position to ensure that each value is in its corresponding place on the line.
 
 #### RowUpdate
+This class contains a sequence of updates to columns to be performed on a row. Each column can be updated only once by a `RowUpdate`, providing an update to an existing column overwrites the previous one. 
 ##### Attributes
+* `map<size_t, function<string(const string&)>> rowMap` : A map from an index of the column to be edited to a function that returns a modification of the value. The current implementation disallows multiple updates to the same index. May be modified to be a vector of such functions in the future.
 ##### Constructors
+Has only the implicit constructor `RowUpdate()` containing no updates. An empty update returns a copy of the provided row.
 ##### Functions
+###### apply()
+**Signature:** `public vector<string> apply(const vector<string>& input_row) const`
+
+Returns a copy of the `input_row` with all updates applied. If no updates are present, returns a copy of the `input_row`.
+
+###### addChange()
+**Signature 1:** `public void addChange(size_t index, const function<string(const string&)>& function);`
+
+**Signature 2:** `public void addChange(size_t index, function<string(const string&)>&& function)`
+
+Given in `index` and `function` adds the `function` to the `rowMap[index]`. It will be applied when `apply()` is called. Adding a `function` to an index already in the `rowMap`, overwrites the previous function. The 2 overloads differ only in the type of reference to the provided `function`.
+
+###### ChangeTo()
+So far the only change pre-implemented consisting of 2 methods: 
+* `private static string _changeToImpl(const string& from, string to)` : Only returns `to`
+* `public static function<string(const string&)> ChangeTo(string to)` : Returns a function created by binding the `to` parameter of the `_changeToImpl()`. This results in a function that modifies any input to the vlaue of `to`.
 
 #### RowComparator
+A comprator functor accepting 2 rows and sorting them by an internal order of importance of columns.
 ##### Constructors
-##### Attributes
-##### Functions
+**Signaature:** `explicit RowComparator(vector<string>&& o)`
 
+Uses `std::move()` to initialize the `order`.
+
+The implicit constructor is deleted, as there are no means of modifying the order and a comparator without the order would be useless.
+##### Attributes
+* `private vector<string> order` : A vector of column names in the order of their impoortance
+##### Operator()
+Is the only function of the class.
+
+**Signature:** `public bool operator()(const TableRow& first_row, const TableRow& second_row) const;`
+
+Given the 2 `TableRow`s traverses the internal order and compares the values of the columns. Uses `std::string::equals` function for comparison. A row which has a value for the queried column is always before a column without the value. If the values of the column are equal, the rows are compared by the next column. If all of the specified columns are checked, the comparator returns `true` (that the `first` should be placed before `second`).
+  
 #### Conditions
 Represents a set of conditions to a row of the table. They are used for filtering rows in queries (in the [shell](#Shell) they are used by the `WHERE` clause). Each condition is a `std::function<bool(const vector<string>&)>`, where the input is the row of a table and thereturned value is whether the condition holds on the row. The implementation is located in the `Conditions.hpp` and `Conditions.cpp` files.
 ##### Attributes
