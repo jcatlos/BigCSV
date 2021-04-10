@@ -8,7 +8,7 @@ BigCSV is a cross-platform command line utility for displaying, manipulating and
 * Schema-independent - Work with multiple data sources as one table
 
 ## Installation
-Make sure, you have installed and running **cmake (3.15 or newer)** and a compiler supporting **C++ 17**.
+Make sure, you have installed and running **cmake (3.15 or newer)** and a compiler supporting **C++ 17**, so far only tested on *g++ 9.2.*.
 
 ### Linux
 Open the cloned repository and run these commands in your terminal:
