@@ -31,6 +31,8 @@ Afterwards, the program is ready to be used. The executable is located in the `b
 ## Usage
 The utility takes arguements via the standrd input. To create and use a script, just write it down to a text file and launch the utility by `BigCSV < [file_name]`.
 
+For quick example, check out the `Testing.md` document.
+
 > **Note:** All tables are stored only in memory. Therefore any modifications performed by changing output attributes or using the `UPDATE` are not saved. If you wish to save them, use the `SELECT` command with the `INTO` clause to save the chnges into a file which can be then loaded as a separate table.
 
 Command are always ended by a semicolon `;`. All tokens are divided by any whitespace. A token containing a whitespoace must be inside double quotes `"`.
