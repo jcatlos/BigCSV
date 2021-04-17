@@ -379,7 +379,7 @@ Returns a copy of the string without any leading and trailing whitespace charact
 
 #### formatRow()
 **Signature:** `string formatRow(const vector<string>& cells, char delimiter, char quotechar, char endline)`
-Returns a row of a csv table made from the `cells`. Each column is enclosed in the `quotechar`, followed by the `delimiter` and ended by the `endline`. No other characters are added into the output. For example:
+Returns a row of a csv table made from the `cells`. Each column is enclosed in the `quotechar`, followed by the `delimiter` and ended by the `endline`. Furthermore, all occurences of the `quotechar` inside any cell is escaped by doubling the original occurence (following the *RFC 4180* specifiation). No other characters are added into the output. For example:
 ```
 input: ["a", "b", "c"], ',', '"', ';'
 output: "a","b","c";

@@ -22,8 +22,7 @@ cmake --build .
 ```
 This approach may work on Windows, as well, however it has not been tested
 ### Windows
-Use cmake GUI application. Select the cloned repository as the source directory and a subdirectory `build` as the build directory. Only the MinGW make configuration has been tested.
-
+Use cmake GUI application. Select the cloned repository (`catlos`, not `catlos/src`) as the source directory and a subdirectory `build` as the build directory.
 ---
 
 Afterwards, the program is ready to be used. The executable is located in the `build` folder
@@ -35,14 +34,14 @@ For quick example, check out the `Testing.md` document.
 
 > **Note:** All tables are stored only in memory. Therefore any modifications performed by changing output attributes or using the `UPDATE` are not saved. If you wish to save them, use the `SELECT` command with the `INTO` clause to save the chnges into a file which can be then loaded as a separate table.
 
-Command are always ended by a semicolon `;`. All tokens are divided by any whitespace. A token containing a whitespoace must be inside double quotes `"`.
+Command are always ended by a semicolon `;`. All tokens are divided by any whitespace. A token containing a whitespace must be inside double quotes `"`.
 
 > **Note:** The command parsing process  commands until the next `;` before any text processing happens. This results in the inability to use the semicolon character in the shell environment.
 
 If an error is encountered while parsing a command, no changes to the tables happen.
 
 ### Paths
-When using a path, use `/` as directory separator, even on Windows. Also note that the executable is located in the `build` directory. Relative paths are acceptable.
+When using a path, **always** use `/` as directory separator, as opposed to `\` (**even on Windows**). Also note that the executable is located in the `build` directory when using relative paths.
 
 ## Commands
 There are 6 commands available: `CREATE TABLE` for creating a table to work with, `ALTER TABLE` to modify its attributes, `INSERT` to add source files into a table, `UPDATE` to modify data in a table, `SELECT` to display data currently in a table and `EXIT` to exit the utility. 

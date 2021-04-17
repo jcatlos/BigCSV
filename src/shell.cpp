@@ -24,7 +24,10 @@ namespace bigCSV {
              while(index <= command.size()-3){
                  std::string first = command[index++];
                  std::string operand = command[index++];
-                 if(operand != "=" && operand != "<" && operand != ">") return true;
+                 if (operand != "=" && operand != "<" && operand != ">") {
+                     index -= 2;
+                     return true;
+                 }
                  std::string second = command[index++];
 
                  int col_index = index_of(first, table.schema);
@@ -51,17 +54,6 @@ namespace bigCSV {
          return true;
     }
 
-    bool Shell::set_map_attribute(const std::string& pair, std::map<std::string, std::string>& attributes) const{
-        auto result = split(pair, '=');
-        // Invalid form of attribute setting
-        if(result.size() != 2) return false;
-        auto key_it = attributes.find(result[0]);
-        // Invalid attribute name
-        if(key_it == attributes.end()) return false;
-        auto res_begin = result[1].begin();
-        key_it->second = getNextWord(result[1], res_begin);
-        return true;
-    }
 
     std::map<std::string, std::string> Shell::get_attribute_map(int& index) const{
         std::map<std::string, std::string> atts;
@@ -86,11 +78,32 @@ namespace bigCSV {
         if(index < command.size() && command[index] == "SET"){
             int start_index = index;
             index++;
-            for(;index<command.size(); index++){
-                if(!set_map_attribute(command[index], atts)){
-                    err_stream<<"Problem with attribute "<<index - start_index<<std::endl;
+            while (index <= command.size() - 3){
+                // Get name and value
+                std::string att_name = command[index];
+                std::string att_value = command[index + 2];
+
+                // Check for command form
+                if (command[index + 1] != "=") {
+                    err_stream << "ERROR: Malformed attribute '" << att_name << "' assignment" << std::endl;
                     return false;
                 }
+
+                // Does the attribute exist in the provided map?
+                auto key_it = atts.find(att_name);
+                if (key_it == atts.end()) {
+                    err_stream << "ERROR: Assigned attribute '" << att_name << "' does not exist" << std::endl;
+                    return false;
+                }
+
+                // Check non-emptiness of the passed value
+                if (att_value.empty()) {
+                    err_stream << "ERROR: Assigned attribute '" << att_name << "' cannot be empty" << std::endl;
+                    return false;
+                }
+
+                key_it->second = att_value;
+                index += 3;
             }
         }
         return true;
@@ -102,6 +115,7 @@ namespace bigCSV {
     std::string Shell::getNextWord(std::string& line, std::string::iterator& it) const{
         std::string out = "";
         while(it != line.end() && isspace(*it)) it++;        // Take all the whitespace before the next word
+        if (it == line.end()) return "";
         bool quoted = *it == '"';
 
         // If the word is in quotes, look until the next quotes
@@ -132,10 +146,12 @@ namespace bigCSV {
 
     // Extracts commant from the in istream, divides it up into tokens and saves them to the Shell.command vector
     void Shell::get_command(std::istream &in) {
-        if(&in == &std::cin) std::cout<<std::endl<<"bigCSV> ";
+        if (&in == &std::cin) std::cout << std::endl<< "Current path: " << std::filesystem::current_path() <<std::endl<< "BigCSV> ";
+        command.clear();
         std::getline(in, command_line ,';');
         std::string word = "";
         auto it = command_line.begin();
+        while (it != command_line.end() && isspace(*it)) it++;      // Remove all leading whitespace
         while(it != command_line.end()){
             word = getNextWord(command_line, it);
             command.push_back(word);
@@ -169,6 +185,7 @@ namespace bigCSV {
             return;
         }
 
+        // Should work, becuause an attribute without a value may not be passed
         tables[table_name] = bigCSV::csvTable(
             table_attributes["IN_DELIMITER"][0],
             table_attributes["IN_QUOTECHAR"][0],
@@ -232,7 +249,7 @@ namespace bigCSV {
         int index = 1;                                          // Current position in the command;
         for(;command[index] != "FROM"; index++){
             if(index == command.size()){
-                err_stream<<"Missing FROM clause"<< std::endl;
+                err_stream<<"Error: Missing FROM clause"<< std::endl;
                 return;
             }
             selected_columns.push_back(command[index]);
@@ -241,7 +258,10 @@ namespace bigCSV {
 
         // Find the specified table
         bigCSV::csvTable* table = get_table(command[index]);
-        if(table == nullptr) return;
+        if (table == nullptr) {
+            err_stream << "Error: table '"<<command[index] <<"' not found" << std::endl;
+            return;
+        }
         index++;
 
         // Now the voluntary parts

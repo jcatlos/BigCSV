@@ -1,0 +1,7 @@
+CREATE TABLE test SET IN_QUOTECHAR = ';
+INSERT INTO test PATH "../../../inputs/small_input.csv"
+ALTER TABLE test SET OUT_DELIMITER = ":";
+SELECT "First name" "Last name" "Test1" "Grade" FROM test WHERE "Test1" > 40 ORDER BY "Grade";
+UPDATE TABLE test SET "Grade" = "PASSED" WHERE "Final" > 50;
+ALTER TABLE test SET OUT_DELIMITER = ",";
+SELECT "Last name" "Final" "Grade" FROM test WHERE "Grade" = "PASSED" ORDER BY "Final" INTO "./passed.csv";
