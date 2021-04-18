@@ -221,21 +221,28 @@ namespace bigCSV {
             }
             std::string value = command[index++];
 
+            // No token after '='
             if(value == "WHERE"){
                 err_stream<<"ERROR: Invalid update '"<<col_name<<"'"<<std::endl;
                 return;
             }
+
+            // Check for existence of the updated column
             int col_index = index_of(col_name, table->schema);
             if(col_index == -1) {
                 err_stream<<"ERROR: Column '"<<col_name<<"' is not in table '"<<command[1]<<"'"<<std::endl;
                 return;
             }
             update.addChange(col_index, BigCSV::RowUpdate::ChangeTo(value));
-            index++;
         }
 
         // Check for WHERE clause
         if(!parse_where_clause(index, *table, conds)) return;
+
+        if (index < command.size()) {
+            err_stream << "Error: Malformed UPDATE query" << std::endl;
+            return;
+        }
 
         table->updateTable(conds, update);
 

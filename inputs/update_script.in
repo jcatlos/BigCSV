@@ -1,0 +1,12 @@
+CREATE TABLE test;
+INSERT INTO test PATH "../inputs/small_input.csv";
+
+SELECT "First name" "Last name" "Grade" FROM test;
+UPDATE test SET "Grade" = "PASSED" WHERE "Final" > 50;
+SELECT "First name" "Last name" "Final" "Grade" FROM test ORDER BY "Last name" INTO "passed.csv";
+
+CREATE TABLE validation;
+INSERT INTO validation PATH "./passed.csv";
+SELECT "First name" "Last name" "Grade" FROM validation;
+
+EXIT;
