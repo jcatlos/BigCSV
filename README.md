@@ -1,5 +1,5 @@
 # BigCSV .csv file editor
-BigCSV is a cross-platform command line utility for displaying, manipulating and filtering large .csv files.
+BigCSV is a cross-platform command line utility for displaying, manipulating and filtering large .csv files. 
 
 ## Features:
 * View, sort and filter .csv files of (almost) any size
@@ -7,8 +7,10 @@ BigCSV is a cross-platform command line utility for displaying, manipulating and
 * SQL-like syntax
 * Schema-independent - Work with multiple data sources as one table
 
+> **Note:** So far the utility does not support non-ASCII characters. However, some success was found when using g++ compiler, it has not been fully tested and they should be avoided.
+
 ## Installation
-Make sure, you have installed and running **cmake (3.15 or newer)** and a compiler supporting **C++ 17**, so far only tested on *g++ 9.2.*.
+Make sure, you have installed and running **cmake (3.15 or newer)** and a compiler supporting **C++ 17**, so far only tested on *g++ 9.2.* and *MSVC 19.28.29913.0*.
 
 ### Linux
 Open the cloned repository and run these commands in your terminal:
@@ -23,9 +25,12 @@ cmake --build .
 This approach may work on Windows, as well, however it has not been tested
 ### Windows
 Use cmake GUI application. Select the cloned repository (`catlos`, not `catlos/src`) as the source directory and a subdirectory `build` as the build directory.
+
+Alternatively, the repository folder can be opened in Visual Studio 2019 (older verions were not tested).
+
 ---
 
-Afterwards, the program is ready to be used. The executable is located in the `build` folder
+Afterwards, the program is ready to be used. The executable (or other output from cmake - depends on the configuration) is located in the `build` folder
 
 ## Usage
 The utility takes arguements via the standrd input. To create and use a script, just write it down to a text file and launch the utility by `BigCSV < [file_name]`.
@@ -48,28 +53,28 @@ There are 6 commands available: `CREATE TABLE` for creating a table to work with
 
 
 ### CREATE TABLE
-**Syntax:** `CREATE TABLE table_name [SET att=val … ];`
+**Syntax:** `CREATE TABLE table_name [SET att = val … ];`
 
 Creates a table named `table_name`. If a value of an attribute is not provided, a default value is used. Attributes and their default values are explained in the [Attributes section](#Table-attributes).
 
 ### ALTER TABLE
-**Syntax:** `ALTER TABLE table_name [SET att=val … ];`
+**Syntax:** `ALTER TABLE table_name [SET att = val … ];`
 
 Alters an existing table with name `table_name` by modifying its [attributes](#Table-attributes). Previous values of attributes are taken as the default values.
 
 ### INSERT
-**Syntax:** `INSERT INTO table_name FILE path [DELIMITER=delim] [ENDLINE=endl] [QUOTECHAR=qchar]`
+**Syntax:** `INSERT INTO table_name FILE path [IN_DELIMITER = delim] [IN_ENDLINE = endl] [IN_QUOTECHAR = qchar]`
 
-Adds a file located at `path` to an existing table `table_name` as a source of data. **In no moment is the soucre file modified.** `DELIMITER`, `ENDLINE` and `QUOTECHAR` signify the delimiter of the tokens, the delimiter of the rows and th character used to optionally encapsulate tokens of the file. If none given, the values of `IN_DELIMITER`, `IN_ENDLINE` and `IN_QUOTECHAR` of the table `table_name` are used.
+Adds a file located at `path` to an existing table `table_name` as a source of data. **In no moment is the soucre file modified.** `IN_DELIMITER`, `IN_ENDLINE` and `IN_QUOTECHAR` signify the delimiter of the tokens, the delimiter of the rows and th character used to optionally encapsulate tokens of the file. If none given, the values of `IN_DELIMITER`, `IN_ENDLINE` and `IN_QUOTECHAR` of the table `table_name` are used.
 
-> **Note:** Shell not check for the existence of the provided file. If a non-existing file there should be no problems, however this was not tested.
+> **Note:** Shell checks for the existence of the provided file. However, it has no way of controlling the type and content of the provided file.
 
 > **Note:** Setting other attributes does not throw an error, however their values are ignored.
 
 ### UPDATE
-**Syntax:** `UPDATE table_name SET col1=val1 … [WHERE cond ...];`
+**Syntax:** `UPDATE table_name SET col1 = val1 … [WHERE cond ...];`
 
-Modifies the values in the existing table `table_name` by setting the specified columns to specified values. This modification can be restricted by the `WHERE` clause. Then only the rows fullfilling all conditions in the clause are modified. In the process of the modification, all the source files are copied into [temporary files]. 
+Modifies the values in the existing table `table_name` by setting the specified columns to specified values. This modification can be restricted by the `WHERE` clause. Then only the rows fullfilling all conditions in the clause are modified. In the process of the modification, all the source files are copied into temporary files. 
 
 ### SELECT
 **Syntax:** `SELECT col1 … coln FROM table_name [WHERE [cond ...]] [ORDER BY col1 … ] [INTO path];`

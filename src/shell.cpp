@@ -210,18 +210,25 @@ namespace bigCSV {
 
         // Extract all updates
         int index = 3;
-        while(index < command.size() && command[index] != "WHERE"){
-            auto pair = split(command[index], '=');
-            if(pair.size() != 2){
-                err_stream<<"ERROR: Invalid update '"<<command[index]<<"'"<<std::endl;
+        while(index <= command.size()-3 && command[index] != "WHERE"){
+            std::string col_name = command[index++];
+            std::string operand = command[index++];
+            if (operand != "=") {
+                index -= 2;
+                break;
+            }
+            std::string value = command[index++];
+
+            if(value == "WHERE"){
+                err_stream<<"ERROR: Invalid update '"<<col_name<<"'"<<std::endl;
                 return;
             }
-            int col_index = index_of(pair[0], table->schema);
+            int col_index = index_of(col_name, table->schema);
             if(col_index == -1) {
-                err_stream<<"ERROR: Column '"<<pair[0]<<"' is not in table '"<<command[1]<<"'"<<std::endl;
+                err_stream<<"ERROR: Column '"<<col_name<<"' is not in table '"<<command[1]<<"'"<<std::endl;
                 return;
             }
-            update.addChange(col_index, BigCSV::RowUpdate::ChangeTo(pair[1]));
+            update.addChange(col_index, BigCSV::RowUpdate::ChangeTo(value));
             index++;
         }
 
@@ -302,6 +309,8 @@ namespace bigCSV {
 
         if(sort) table->sort(out, comparator, conds, selected_columns);
         else table->printColumns(out, selected_columns, conds);
+
+        if (to_file) file_stream.close();
     }
 
     void Shell::insert(){
@@ -317,20 +326,27 @@ namespace bigCSV {
 
         auto path = command[4];
         int index = 5;
-        std::map<std::string, std::string> file_attributes = get_attribute_map(index);
+        //std::map<std::string, std::string> file_attributes = get_attribute_map(index);
+        std::map<std::string, std::string>table_attributes;
+        table_attributes["IN_DELIMITER"] = table->in_delimiter;
+        table_attributes["IN_QUOTECHAR"] = table->in_quotechar;
+        table_attributes["IN_ENDLINE"] = table->in_endline;
+        table_attributes["OUT_DELIMITER"] = table->out_delimiter;
+        table_attributes["OUT_QUOTECHAR"] = table->out_quotechar;
+        table_attributes["OUT_ENDLINE"] = table->out_endline;
+        table_attributes["MAX_FILESIZE"] = std::to_string(table->max_filesize);
 
-        if(file_attributes.empty()){
+        /*if(file_attributes.empty()){
             err_stream<<"Problems occured during attribute parsing, Aborting INSERT INTO"<<std::endl;
             return;
-        }
+        }*/
 
         if(!std::filesystem::exists(path)){
             err_stream<<"Error: The provied file does not exist"<<std::endl;
             return;
         }
 
-        table->addFile(path, file_attributes["IN_DELIMITER"][0], file_attributes["IN_ENDLINE"][0],
-                                   file_attributes["IN_QUOTECHAR"][0]);
+        table->addFile(path, table->in_delimiter , table->in_endline, table->in_quotechar);
 
     }
 
