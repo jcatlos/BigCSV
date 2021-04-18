@@ -4,7 +4,7 @@ For testing purposes, there is the `inputs` folder containing 2 input files and 
 * `covid_trade.csv` Contains data large enough that the sorting is done by the file distribution and merging
 * `small_script.in` Contains a short demonstration of how a script for the utility can be written.
 * `max_filesize_comparison_script,in` Demonstrtes the difference of calculation speed when the `MAX_FILESIZE` constant is increased.
-* `join_tables_script.in` Demonstrates the ability to use multiple input files for querying.
+* `multiple_tables_script.in` Demonstrates the ability to use multiple tables in the same script and multiple input files for querying.
 
 Currently, the scripts use path that works with launching the  program in Visual Studio 19 (where the program runs in `catlos/build/` directory). If testing in other environment, change the paths in all `INSERT INTO` statements. Regular slashes as directory delimiters should be used **even on Windows**.
 
