@@ -1,13 +1,17 @@
 # Testing
-For testing purposes, there is the `inputs` folder containing 3 files:
+For testing purposes, there is the `inputs` folder containing 2 input files and 3 demonstrational scripts:
 * `small_input.csv` Contains data small enough to easily test whether all functions work properly
-* `large_input.csv` Contains data large enough that the sorting is done by the file distribution and merging
-* `script.in` Contains a short demonstration of how a script for the utility can be written.
+* `covid_trade.csv` Contains data large enough that the sorting is done by the file distribution and merging
+* `small_script.in` Contains a short demonstration of how a script for the utility can be written.
+* `max_filesize_comparison_script,in` Demonstrtes the difference of calculation speed when the `MAX_FILESIZE` constant is increased.
+* `join_tables_script.in` Demonstrates the ability to use multiple input files for querying.
 
-The files can be accessed from the utility by using the path `../inputs/small_input.csv`. Regular slashes should be used **even on Windows**.
+The files can be accessed from the utility by using the path `../inputs/small_input.csv`. Regular slashes as directory delimiters should be used **even on Windows**.
+
+>**Note:** Currently, the scripts use path that works with launching the  program in Visual Studio 19 (where the program runs in `catlos/out/build/x86-Release/` directory). If testing in other environment, change the paths in all `INSERT INTO` statements.
 
 To execute the string in the utility use:
 ```
 ./BigCSV < ../inputs/script.in
 ```
-However here use directory separators **according to the target OS**.
+However in this command use directory separators **according to the target OS**.

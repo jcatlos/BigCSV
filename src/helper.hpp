@@ -31,9 +31,6 @@ namespace bigCSV {
     // Given a vector of tokens, a delimiter, quotechar, and an endline characters returns these values formatted as a csv table row
     std::string formatRow(const std::vector<std::string>& cells, char delimiter, char quotechar, char endline);
 
-    // Splits the given string by the delimiter
-    std::vector<std::string> split(const std::string& in, const char delim);
-
     // Given 2 schemas returns a (set) union of these schemas
     std::vector<std::string> createJoinedSchema (const std::vector<std::string>& first, const std::vector<std::string>& second);
 

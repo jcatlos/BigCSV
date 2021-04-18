@@ -83,17 +83,6 @@ namespace bigCSV{
         return output;
     }
 
-    // Returns a vector of tokens from the input string divided by a delimiter
-    std::vector<std::string> split(const std::string& in, const char delim){
-        std::vector<std::string> out;
-        std::stringstream stream(in);
-        std::string substr;
-        while(std::getline(stream, substr, delim)){
-            out.push_back(substr);
-        }
-        return out;
-    }
-
     // Given 2 row schemas, returns a schema containing all columns from the two
         // Works like set union
     std::vector<std::string> createJoinedSchema (const std::vector<std::string>& first,

@@ -33,7 +33,6 @@ namespace bigCSV {
         // Attribute map functions
         std::map<std::string, std::string> get_attribute_map(int& index) const;
         bool modify_attribute_map(int& index, std::map<std::string, std::string>& atts) const;
-        bool set_map_attribute(const std::string &pair, std::map<std::string, std::string> &attributes) const;
 
         // Functions for commands - only for better readibility
         void create();

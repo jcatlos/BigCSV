@@ -56,6 +56,7 @@ namespace bigCSV {
 
 
     std::map<std::string, std::string> Shell::get_attribute_map(int& index) const{
+        // Set default values
         std::map<std::string, std::string> atts;
         atts["IN_DELIMITER"] = ",";
         atts["IN_QUOTECHAR"] = "\"";
@@ -65,6 +66,7 @@ namespace bigCSV {
         atts["OUT_ENDLINE"] = "\n";
         atts["MAX_FILESIZE"] = "13500";
 
+        // Parse the SET clause
         if(modify_attribute_map(index, atts)){
             return atts;
         }

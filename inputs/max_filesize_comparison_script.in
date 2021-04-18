@@ -1,0 +1,9 @@
+CREATE TABLE trade_info;
+INSERT INTO trade_info PATH "../../../inputs/covid_trade.csv";
+
+SELECT "Date" "Direction" "Country" "Commodity" "Value" FROM trade_info ORDER BY "Date";
+ALTER TABLE trade_info SET MAX_FILESIZE = 100000;
+SELECT "Date" "Direction" "Country" "Commodity" "Value" FROM trade_info ORDER BY "Date";
+ALTER TABLE trade_info SET OUT_QUOTECHAR = ' OUT_DELIMITER = ".";
+
+EXIT;

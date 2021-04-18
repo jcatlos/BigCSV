@@ -39,17 +39,14 @@ Gets the next command from the istream and modifies the `Shell` attributes accor
 A commant prompt is displayed to the user if the utility is used in the terminal. The check is performed by comparison `&in == &std::cout`.
 
 #### Attribute map functions
-Following 3 functions are used to parse the `SET` clauses of commands by maintaining and updating a map (attribute name -> attribute value) handled accross these functions.
-
-##### set_map_attribute()
-**Signature:** `bool set_map_attribute(const string &pair, map<string, string> &attributes) const`
-
-Given an attribute pair in the form `attribute=value`, sets the value of the attribute in the `attribustes` map accordingly. Returns a boolean signifying whether the action was successful. The value pair is checked if it is in the prescribed form. Then the name of the attribute is checked if it is in the provided `attributes` map. If some of the checks fail, the user is informed via the `err_stream` and `false`  is returned. All values are passed as strings. A value may be enclosed in `"` (double-quotes), then the `getNextWord()` function is used to process it into a token.
+Following 2 functions are used to parse the `SET` clauses of commands by maintaining and updating a map (attribute name -> attribute value) handled accross these functions.
 
 ##### modify_attribute_map()
 **Signature:** `bool modify_attribute_map(int& index, map<string, string>& atts) const`
 
-Given an index into the `command` and a map of attributes to modify, parses the `SET` clause of command (using `set_map_attribute()`) and returns a boolean signalizing whether any problenms arose during the process. In such case, the reason of the problem is sent onto the `err_stream`. If a value for an attribute is specified in multiple `attribute=value` pair, the last pair is used.
+Given an index into the `command` and a map of attributes to modify, parses the `SET` clause of command. That is done by traversing through the command, looking for sequences of tokens in form `attribute_name`, `=`, `value`. Returns a boolean signalizing whether any problems arose (if `attribute_name` is not a name of an attribute or `attribute_value` is empty) during the process. In such case, the reason of the problem is sent onto the `err_stream`. When the second token of a looked sequence is not `=` returns `true`. In both cases, the `index` is now the index after the last valid sequence. 
+
+If a value for an attribute is specified in multiple `attribute = value` sequences, the last pair is used.
 
 ##### get_attribute_map()
 **Signature:** `map<string, string> get_attribute_map(int& index) const`
@@ -385,10 +382,6 @@ input: ["a", "b", "c"], ',', '"', ';'
 output: "a","b","c";
 ```
 All generated files arre formatted by this function.
-
-#### split()
-**Signature:** `vector<string> split(const string& in, const char delim)`
-An implementation of the standard split operation on a string. Returns a vector of tokens created from the `in` by splitting it by the `delim` delimiting character.
 
 #### createJoinedSchema()
 **Signature:** `vector<string> createJoinedSchema (const vector<string>& first, const vector<string>& second)`

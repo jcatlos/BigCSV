@@ -7,7 +7,7 @@ BigCSV is a cross-platform command line utility for displaying, manipulating and
 * SQL-like syntax
 * Schema-independent - Work with multiple data sources as one table
 
-> **Note:** So far the utility does not support non-ASCII characters. However, some success was found when using g++ compiler, it has not been fully tested and they should be avoided.
+> **Note:** So far the utility does not support non-ASCII characters. Some success was found when using g++ compiler, however it has not been fully tested and they should be avoided.
 
 ## Installation
 Make sure, you have installed and running **cmake (3.15 or newer)** and a compiler supporting **C++ 17**, so far only tested on *g++ 9.2.* and *MSVC 19.28.29913.0*.
@@ -43,14 +43,13 @@ Command are always ended by a semicolon `;`. All tokens are divided by any white
 
 > **Note:** The command parsing process  commands until the next `;` before any text processing happens. This results in the inability to use the semicolon character in the shell environment.
 
-If an error is encountered while parsing a command, no changes to the tables happen.
+If an error is encountered while parsing a command, the command is not executed and no changes to the tables happen.
 
 ### Paths
 When using a path, **always** use `/` as directory separator, as opposed to `\` (**even on Windows**). Also note that the executable is located in the `build` directory when using relative paths.
 
 ## Commands
 There are 6 commands available: `CREATE TABLE` for creating a table to work with, `ALTER TABLE` to modify its attributes, `INSERT` to add source files into a table, `UPDATE` to modify data in a table, `SELECT` to display data currently in a table and `EXIT` to exit the utility. 
-
 
 ### CREATE TABLE
 **Syntax:** `CREATE TABLE table_name [SET att = val … ];`
@@ -79,7 +78,7 @@ Modifies the values in the existing table `table_name` by setting the specified 
 ### SELECT
 **Syntax:** `SELECT col1 … coln FROM table_name [WHERE [cond ...]] [ORDER BY col1 … ] [INTO path];`
 
-Prints the columns specified by their names in the source files from an existing table `table_name`. These results may be filtered by the `WHERE` clause and ordered by the `ORDER BY` clause. If a `INTO` clause is present, the output is instead saved into provided relative path `path`. Errors and warnings are still printed to the standard error output.
+Prints the columns specified by their names in the source files from an existing table `table_name`. These results may be filtered by the `WHERE` clause and ordered by the `ORDER BY` clause. If the `INTO` clause is present, the output is instead saved into provided relative path `path`. Errors and warnings are still printed to the standard error output.
 
 The columns of the `ORDER BY` clause *must* be a subset of the selected columns.
 By using the `ORDER BY` clause, the sorting process is started. The files are distributed into temporary partition files of [`MAX_FILESIZE`](#Table-attributes), which are sorted in memory and then merged into one file.
