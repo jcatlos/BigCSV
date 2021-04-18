@@ -77,7 +77,7 @@ Is responsible for processing of the `SELECT` command. Creates a vector of colum
 Finally, depending on the pressence of the `ORDER BY` clause, the `csvTable::printColumns()` of `csvTable::sort()` function is called.
 
 ##### insert()
-Is responsible for processing of the `CREATE` command. Checks the syntax of the command, then checks for the validity of the provided name using `get_table()`. If the command contains more tokens, `get_attribute_map()` is called to extract any attributes provided. If the function finishes successfully, `csvTable::addFile()` is called using the `IN_...` attributes. 
+Is responsible for processing of the `INSERT` command. Checks the syntax of the command, then checks for the validity of the provided name using `get_table()`. A map from the underlying `BigCSV::csvTable`'s attributes is created. That is passed to the `modify_attribute_map()` function to modify any specified attributes. If the function finishes successfully, `csvTable::addFile()` is called using the `IN_...` attributes. 
 
 ##### alter()
 Is responsible for processing of the `ALTER` command. Checks the syntax of the command and finds the specified table using `get_table()`. Creates a map of attributes which is passed to the `modify_attribute_map()` function (this is the reason that the `modify_attribute_map()` function is kept separate from the `get_attribute_map()`). Then tries to use `std::stoi()` checks for the non-negativity of the `MAX_FILESIZE` attribute and if it is valid sets the table's attributes to correspond to the demanded values.
