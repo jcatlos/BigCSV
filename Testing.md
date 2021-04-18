@@ -6,9 +6,7 @@ For testing purposes, there is the `inputs` folder containing 2 input files and 
 * `max_filesize_comparison_script,in` Demonstrtes the difference of calculation speed when the `MAX_FILESIZE` constant is increased.
 * `join_tables_script.in` Demonstrates the ability to use multiple input files for querying.
 
-The files can be accessed from the utility by using the path `../inputs/small_input.csv`. Regular slashes as directory delimiters should be used **even on Windows**.
-
->**Note:** Currently, the scripts use path that works with launching the  program in Visual Studio 19 (where the program runs in `catlos/out/build/x86-Release/` directory). If testing in other environment, change the paths in all `INSERT INTO` statements.
+Currently, the scripts use path that works with launching the  program in Visual Studio 19 (where the program runs in `catlos/build/` directory). If testing in other environment, change the paths in all `INSERT INTO` statements. Regular slashes as directory delimiters should be used **even on Windows**.
 
 To execute the string in the utility use:
 ```

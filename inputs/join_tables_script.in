@@ -1,5 +1,5 @@
 CREATE TABLE trade_info;
-INSERT INTO trade_info PATH "../../../inputs/covid_trade.csv";
+INSERT INTO trade_info PATH "../inputs/covid_trade.csv";
 
 SELECT "Date" "Direction" "Country" "Commodity" "Value" FROM trade_info WHERE "Country" = "China" "Direction" = "Exports" INTO "./china_exports.csv";
 SELECT "Date" "Direction" "Country" "Commodity" "Value" FROM trade_info WHERE "Country" = "China" "Direction" = "Imports" INTO "./china_imports.csv";
