@@ -1,0 +1,10 @@
+^C:\USERS\JAKUB\DOCUMENTS\GITHUB\CATLOS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/jakub/Documents/GitHub/catlos -BC:/Users/jakub/Documents/GitHub/catlos/build --check-stamp-file C:/Users/jakub/Documents/GitHub/catlos/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

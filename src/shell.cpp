@@ -343,6 +343,11 @@ namespace bigCSV {
             return;
         }*/
 
+        if (!modify_attribute_map(index, table_attributes)) {
+            err_stream << "Problems occured during attribute parsing, Aborting ALTER" << std::endl;
+            return;
+        }
+
         if(!std::filesystem::exists(path)){
             err_stream<<"Error: The provied file does not exist"<<std::endl;
             return;
